@@ -26,12 +26,8 @@ public:
     }
 
 
-    void create();
-    void destroy();
-
-
-    void animate(f64 t, f64 dt);
-    void render();
+    virtual void animate(f64 t, f64 dt);
+    virtual void render();
 };
 
 

@@ -25,22 +25,22 @@ BASE_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))/
 all: archifake
 
 clean:
-    @rm -f archifake
-    @rm -f $(OBJECTS)
+	@rm -f archifake
+	@rm -f $(OBJECTS)
 
 
 archifake: $(OBJECTS)
-    @echo "linking $(subst $(BASE_DIR),,$@)..."
-    @$(LINK.o) -o $@ $^ $(LIBRARIES)
+	@echo "linking $(subst $(BASE_DIR),,$@)..."
+	@$(LINK.o) -o $@ $^ $(LIBRARIES)
 
 
 %.o: %.c
-    @echo "compiling $(subst $(BASE_DIR),,$<)..."
-    @$(COMPILE.c) -o $@ $<
+	@echo "compiling $(subst $(BASE_DIR),,$<)..."
+	@$(COMPILE.c) -o $@ $<
 
 %.o: %.cpp
-    @echo "compiling $(subst $(BASE_DIR),,$<)..."
-    @$(COMPILE.cpp) -o $@ $<
+	@echo "compiling $(subst $(BASE_DIR),,$<)..."
+	@$(COMPILE.cpp) -o $@ $<
 
 
 .PHONY: all clean

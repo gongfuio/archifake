@@ -17,7 +17,7 @@
 
 
 void SurfaceTask::start() {
-    if (!this->started) {
+    if (!this->started && this->surface) {
         this->started = true;
         this->startTick = this->lastTick = Clock::tick();
     }
@@ -41,7 +41,7 @@ void SurfaceTask::stop() {
 }
 
 void SurfaceTask::show() {
-    if (!this->visible) {
+    if (!this->visible && this->surface) {
         this->visible = true;
     }
 }

@@ -16,12 +16,6 @@
 #include "archifake.hpp"
 
 
-void Surface::create() {
-}
-
-void Surface::destroy() {
-}
-
 void Surface::animate(f64 t, f64 dt) {
 }
 
