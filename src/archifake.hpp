@@ -37,9 +37,10 @@
 //#include <X11/Xutil.h>
 //#include <X11/Xft/Xft.h>
 
-//#include <GL/glew.h>
+#include <GL/glew.h>
 #include <GL/glx.h>
 #include <GL/glxext.h>
+#include <GL/gl.h>
 
 #include <list>
 #include <map>
@@ -67,8 +68,14 @@ typedef float                   f32;
 typedef double                  f64;
 
 
+// macros
+#define MIN(a, b)  ((a) < (b) ? (a) : (b))
+
+
 // program headers
 #include "utils/clock.hpp"
+#include "utils/math.hpp"
+#include "utils/buffer.hpp"
 #include "scene/surface.hpp"
 #include "scene/scene.hpp"
 #include "window.hpp"
