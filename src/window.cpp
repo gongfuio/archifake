@@ -328,16 +328,22 @@ bool GLWindow::activate() {
 }
 
 void GLWindow::beginFrame() {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClearDepth(0.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
+        glClearColor(0.0, 0.0, 0.0, 1.0);
+        glClearDepth(0.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 }
 
 void GLWindow::endFrame() {
-    glFlush();
-    glXSwapBuffers(this->display, this->glxWindow);
+    if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
+        glFlush();
+        glXSwapBuffers(this->display, this->glxWindow);
+    }
 }
 
 void GLWindow::deactivate() {
-    glXMakeContextCurrent(this->display, None, None, NULL);
+    if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
+        glXMakeContextCurrent(this->display, None, None, NULL);
+    }
 }
