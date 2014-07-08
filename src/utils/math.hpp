@@ -11,6 +11,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+    Authors:
+    -------
+
+    Antony Ducommun <nitro@tmsrv.org>
+
 */
 
 #ifndef __MATH_H_INCLUDE__
@@ -22,20 +29,116 @@
 #include <stdio.h>
 
 
-#define EPS_FLOAT      1.19e-07
-#define EPS_DOUBLE     2.22e-16
+#define EPS_FLOAT        1.19e-07
+#define EPS_DOUBLE       2.22e-16
+#define EPS_LONG_DOUBLE  1.08e-19
 
 
-#define MIN(a, b)  ((a) < (b) ? (a) : (b))
-#define MAX(a, b)  ((a) > (b) ? (a) : (b))
+#define _min(a, b)  ((a) < (b) ? (a) : (b))
+#define _max(a, b)  ((a) > (b) ? (a) : (b))
 
 
-inline bool equals(float a, float b, float eps = EPS_FLOAT * 100) {
-    return (fabsf(a - b) <= eps);
+template<typename T>
+inline T _eps(T scale = T(1)) {
+    return T(0);
 }
 
-inline bool equals(double a, double b, double eps = EPS_DOUBLE * 100) {
-    return (fabs(a - b) <= eps);
+template<>
+inline float _eps<float>(float scale) {
+    return EPS_FLOAT * scale;
+}
+
+template<>
+inline double _eps<double>(double scale) {
+    return EPS_DOUBLE * scale;
+}
+
+template<>
+inline long double _eps<long double>(long double scale) {
+    return EPS_LONG_DOUBLE * scale;
+}
+
+
+inline float _abs(float value) {
+    return fabsf(value);
+}
+
+inline double _abs(double value) {
+    return fabs(value);
+}
+
+inline long double _abs(long double value) {
+    return fabsl(value);
+}
+
+
+inline float _copysign(float dst, float src) {
+    return copysignf(dst, src);
+}
+
+inline double _copysign(double dst, double src) {
+    return copysign(dst, src);
+}
+
+inline long double _copysign(long double dst, long double src) {
+    return copysignl(dst, src);
+}
+
+
+inline float _sqrt(float value) {
+    return sqrtf(value);
+}
+
+inline double _sqrt(double value) {
+    return sqrt(value);
+}
+
+inline long double _sqrt(long double value) {
+    return sqrtl(value);
+}
+
+
+inline float _hypot(float a, float b) {
+    return hypotf(a, b);
+}
+
+inline double _hypot(double a, double b) {
+    return hypot(a, b);
+}
+
+inline long double _hypot(long double a, long double b) {
+    return hypotl(a, b);
+}
+
+
+template<typename T>
+inline bool _eq(T a, T b) {
+    return _abs(a - b) <= _eps<T>(T(100));
+}
+
+template<typename T>
+inline bool _ne(T a, T b) {
+    return !_eq(a, b);
+}
+
+template<typename T>
+inline bool _eq0(T a) {
+    return _eq(a, T(0));
+}
+
+template<typename T>
+inline bool _eq1(T a) {
+    return _eq(a, T(1));
+}
+
+template<typename T>
+inline bool _ne0(T a) {
+    return !_eq0(a);
+}
+
+template<typename T>
+inline bool _ne1(T a) {
+    return !_eq1(a);
 }
 
 
@@ -70,7 +173,7 @@ public:
 
     template<int n2>
     Vector(const Vector<T, n2> &vec) {
-        for (int i = MIN(n, n2) - 1; i >= 0; i--) {
+        for (int i = _min(n, n2) - 1; i >= 0; i--) {
             this->data[i] = vec[i];
         }
         for (int i = n - 1; i >= n2; i--) {
@@ -88,7 +191,7 @@ public:
 
     template<int n2>
     Vector<T, n> & operator =(const Vector<T, n2> &vec) {
-        for (int i = MIN(n, n2) - 1; i >= 0; i--) {
+        for (int i = _min(n, n2) - 1; i >= 0; i--) {
             this->data[i] = vec[i];
         }
         for (int i = n - 1; i >= n2; i--) {
@@ -109,7 +212,7 @@ public:
 
     int operator ==(const Vector<T, n> &vec) const {
         for (int i = n - 1; i >= 0; i--) {
-            if (!equals(this->data[i], vec[i])) {
+            if (!_eq(this->data[i], vec[i])) {
                 return false;
             }
         }
@@ -166,15 +269,17 @@ public:
     Vector<T, n> operator / (T scalar) const {
         Vector<T, n> dst;
 
+        scalar = T(1) / scalar;
         for (int i = n - 1; i >= 0; i--) {
-            dst[i] = this->data[i] / scalar;
+            dst[i] = this->data[i] * scalar;
         }
         return dst;
     }
 
     Vector<T, n> & operator /= (T scalar) {
+        scalar = T(1) / scalar;
         for (int i = n - 1; i >= 0; i--) {
-            this->data[i] /= scalar;
+            this->data[i] *= scalar;
         }
         return *this;
     }
@@ -264,16 +369,14 @@ public:
         Vector<T, n> dst;
 
         for (int i = n - 1; i >= 0; i--) {
-            dst[i] = this->data[i] >= T(0) ? this->data[i] : -this->data[i];
+            dst[i] = (T)_abs(this->data[i]);
         }
         return dst;
     }
 
     Vector<T, n> & abs() {
         for (int i = n - 1; i >= 0; i--) {
-            if (this->data[i] >= T(0)) {
-                this->data[i] = -this->data[i];
-            }
+            this->data[i] = (T)_abs(this->data[i]);
         }
         return *this;
     }
@@ -293,9 +396,9 @@ public:
     }
 
 
-    bool null() const {
+    bool isNull() const {
         for (int i = n - 1; i >= 0; i--) {
-            if (!equals(this->data[i], T(0))) {
+            if (_ne0(this->data[i])) {
                 return false;
             }
         }
@@ -303,45 +406,11 @@ public:
     }
 
 
-    // operator Vector<T, 2>() const {
-    //     if (n == 0) {
-    //         return Vector<T, 2>();
-    //     }
-    //     if (n == 1) {
-    //         return Vector<T, 2>(this->data[0]);
-    //     }
-    //     return Vector<T, 2>(this->data[0], this->data[1]);
-    // }
-
-    // operator Vector<T, 3>() const {
-    //     if (n == 0) {
-    //         return Vector<T, 3>();
-    //     }
-    //     if (n == 1) {
-    //         return Vector<T, 3>(this->data[0]);
-    //     }
-    //     if (n == 2) {
-    //         return Vector<T, 3>(this->data[0], this->data[1]);
-    //     }
-    //     return Vector<T, 3>(this->data[0], this->data[1], this->data[2]);
-    // }
-
-    // operator Vector<T, 4>() const {
-    //     if (n == 0) {
-    //         return Vector<T, 4>();
-    //     }
-    //     if (n == 1) {
-    //         return Vector<T, 4>(this->data[0]);
-    //     }
-    //     if (n == 2) {
-    //         return Vector<T, 4>(this->data[0], this->data[1]);
-    //     }
-    //     if (n == 3) {
-    //         return Vector<T, 4>(this->data[0], this->data[1], this->data[2]);
-    //     }
-    //     return Vector<T, 4>(this->data[0], this->data[1], this->data[2], this->data[3]);
-    // }
-
+    void print(const char *name) const {
+        printf("%s[%d]=\n", name, n);
+        this->print();
+        printf("\n");
+    }
 
     void print() const {
         for (int i = 0; i < n; i++) {
@@ -377,27 +446,17 @@ inline Vector<T, 4> Vector4(T x, T y, T z, T w) {
 }
 
 
-template<int n>
-float norm(const Vector<float, n> &vec) {
-    return sqrtf(vec.dot());
-}
-
-template<int n>
-double norm(const Vector<double, n> &vec) {
-    return sqrt(vec.dot());
-}
-
-template<int n>
-long double norm(const Vector<long double, n> &vec) {
-    return sqrtl(vec.dot());
+template<typename T, int n>
+inline T norm(const Vector<T, n> &vec) {
+    return _sqrt(vec.dot());
 }
 
 template<typename T, int n>
 Vector<T, n> normalize(const Vector<T, n> &vec) {
-    T l = (T)norm(vec);
+    T length = (T)norm(vec);
 
-    if (!equals(l, T(0))) {
-        return (vec * (T(1) / l));
+    if (_ne0(length)) {
+        return vec / length;
     }
     return Vector<T, n>();
 }
@@ -442,7 +501,7 @@ public:
 
     template<int m2, int n2>
     Matrix(const Matrix<T, m2, n2> &mat) {
-        for (int i = MIN(m, m2) - 1; i >= 0; i--) {
+        for (int i = _min(m, m2) - 1; i >= 0; i--) {
             this->data[i] = mat[i];
         }
     }
@@ -457,7 +516,7 @@ public:
 
     template<int m2, int n2>
     Matrix<T, m, n> & operator =(const Matrix<T, m2, n2> &mat) {
-        for (int i = MIN(m, m2) - 1; i >= 0; i--) {
+        for (int i = _min(m, m2) - 1; i >= 0; i--) {
             this->data[i] = mat[i];
         }
         for (int i = m - 1; i >= m2; i--) {
@@ -511,7 +570,7 @@ public:
 
     int operator ==(const Matrix<T, m, n> &mat) const {
         for (int i = m - 1; i >= 0; i--) {
-            if (!equals(this->data[i], mat[i])) {
+            if (_ne(this->data[i], mat[i])) {
                 return false;
             }
         }
@@ -551,15 +610,17 @@ public:
     Matrix<T, m, n> operator / (T scalar) const {
         Matrix<T, m, n> dst;
 
+        scalar = T(1) / scalar;
         for (int i = m - 1; i >= 0; i--) {
-            dst[i] = this->data[i] / scalar;
+            dst[i] = this->data[i] * scalar;
         }
         return dst;
     }
 
     Matrix<T, m, n> & operator /= (T scalar) {
+        scalar = T(1) / scalar;
         for (int i = m - 1; i >= 0; i--) {
-            this->data[i] /= scalar;
+            this->data[i] *= scalar;
         }
         return *this;
     }
@@ -635,6 +696,18 @@ public:
         this->fill(T(1));
     }
 
+    void identity() {
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                if (i == j) {
+                    this->data[i][j] = T(1);
+                } else {
+                    this->data[i][j] = T(0);
+                }
+            }
+        }
+    }
+
 
     Matrix<T, m, n> abs() const {
         Matrix<T, m, n> dst;
@@ -685,10 +758,10 @@ public:
     };
 
 
-    bool null() const {
+    bool isNull() const {
         for (int i = m - 1; i >= 0; i--) {
             for (int j = n - 1; j >= 0; j--) {
-                if (this->data[i][j] != T(0)) {
+                if (_ne0(this->data[i][j])) {
                     return false;
                 }
             }
@@ -696,10 +769,10 @@ public:
         return true;
     }
 
-    bool diagonal() const {
+    bool isDiagonal() const {
         for (int i = m - 1; i >= 0; i--) {
             for (int j = n - 1; j >= 0; j--) {
-                if (i != j && !equals(this->data[i][j], T(0))) {
+                if (i != j && _ne0(this->data[i][j])) {
                     return false;
                 }
             }
@@ -707,26 +780,28 @@ public:
         return true;
     }
 
-    bool identity() const {
-        for (int i = m - 1; i >= 0; i--) {
-            for (int j = n - 1; j >= 0; j--) {
-                if (i == j) {
-                    if (!equals(this->data[i][j], T(1))) {
-                        return false;
-                    }
-                } else if (!equals(this->data[i][j], T(0))) {
-                    return false;
-                }
+    bool isIdentity() const {
+        if (!this->isDiagonal()) {
+            return false;
+        }
+        for (int i = _min(m, n) - 1; i >= 0; i--) {
+            if (_ne1(this->data[i][i])) {
+                return false;
             }
         }
         return true;
     }
 
-    bool orthogonal() const {
-        (*this * this->transpose()).print();
-        return (*this * this->transpose()).identity();
+    inline bool isOrthogonal() const {
+        return (*this * this->transpose()).isIdentity();
     }
 
+
+    void print(const char *name) const {
+        printf("%s[%dx%d]=\n", name, m, n);
+        this->print();
+        printf("\n");
+    }
 
     void print() const {
         for (int i = 0; i < m; i++) {
@@ -778,7 +853,7 @@ inline Matrix<T, 4, 4> Matrix4x4(T m11, T m12, T m13, T m14, T m21, T m22, T m23
 
 template<typename T, int n>
 void transpose(Matrix<T, n, n> &mat) {
-    unsigned long flags[mat.bits];
+    unsigned char flags[mat.bits];
 
     for (int i = mat.bits - 1; i >= 0; i--) {
         flags[i] = 0;
@@ -807,7 +882,7 @@ void transpose(Matrix<T, n, n> &mat) {
 
 template<typename T, int n>
 T trace(const Matrix<T, n, n> &mat) {
-    T dst = 0;
+    T dst = T(0);
 
     for (int i = n - 1; i >= 0; i--) {
         dst += mat[i][i];
@@ -846,10 +921,10 @@ Matrix<T, m, n> orthonormalize(const Matrix<T, m, n> &mat) {
     Matrix<T, m, n> dst(mat);
 
     for (int i = 0; i < m; i++) {
-        T l = norm(dst[i]);
+        T length = norm(dst[i]);
 
-        if (!equals(l, T(0))) {
-            dst[i] *= T(1) / l;
+        if (_ne0(length)) {
+            dst[i] /= length;
             for (int k = i + 1; k < m; k++) {
                 dst[k] -= dst[i] * dst[i].dot(dst[k]);
             }
@@ -865,16 +940,16 @@ void qr(const Matrix<T, n, n> &mat, Matrix<T, n, n> &q, Matrix<T, n, n> &r) {
     q = mat.transpose();
     r.zeros();
     for (int i = 0; i < n; i++) {
-        T l = norm(q[i]);
+        T length = norm(q[i]);
 
-        if (!equals(l, T(0))) {
-            q[i] *= T(1) / l;
-            r[i][i] = l;
+        if (_ne0(length)) {
+            q[i] /= length;
+            r[i][i] = length;
 
             for (int k = i + 1; k < n; k++) {
-                l = q[i].dot(q[k]);
-                q[k] -= q[i] * l;
-                r[i][k] = l;
+                length = q[i].dot(q[k]);
+                q[k] -= q[i] * length;
+                r[i][k] = length;
             }
         } else {
             q[i].zeros();
@@ -883,9 +958,89 @@ void qr(const Matrix<T, n, n> &mat, Matrix<T, n, n> &q, Matrix<T, n, n> &r) {
     transpose(q);
 }
 
-template<typename T, int m, int n>
-void svd(const Matrix<T, m, n> &mat, Matrix<T, m, m> &u, Matrix<T, m, n> &s, Matrix<T, n, n> &v) {
-    // TODO:
+template<typename T, int n>
+void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Matrix<T, n, n> &v) {
+    const int sweepmax = _max(12, 5 * n);
+    const T tolerance = _eps<T>(T(10 * n));
+    int count = 1;
+    int sweep = 0;
+
+    u = mat;
+    s.zeros();
+    for (int i = 0; i < n; i++) {
+        s[i][i] = _eps<T>(norm(u.col(i)));
+    }
+    v.identity();
+    while (count > 0 && sweep <= sweepmax) {
+        count = n * (n - 1) / 2;
+        for (int j = 0; j < n - 1; j++) {
+            for (int k = j + 1; k < n; k++) {
+                const Vector<T, n> &cj(u.col(j));
+                const Vector<T, n> &ck(u.col(k));
+                T ej = s[j][j];
+                T ek = s[k][k];
+                T aj = norm(cj);
+                T ak = norm(ck);
+                T alpha = T(2) * cj.dot(ck);
+
+                if (aj >= ak && (_abs(alpha) <= (tolerance * aj * ak) || aj < ej || ak < ek)) {
+                    count--;
+                    continue;
+                }
+
+                T beta = aj * aj - ak * ak;
+                T gamma = _hypot(alpha, beta);
+                T cosine = T(0);
+                T sine = T(1);
+
+                if (_ne0(gamma)) {
+                    if (beta > 0) {
+                        cosine = _sqrt((beta + gamma) / (T(2) * gamma));
+                        sine = alpha / (T(2) * gamma * cosine);
+                    } else {
+                        sine = _sqrt((gamma - beta) / (T(2) * gamma));
+                        cosine = alpha / (T(2) * gamma * sine);
+                    }
+                }
+
+                for (int i = 0; i < n; i++) {
+                    T x = u[i][j];
+                    T y = u[i][k];
+
+                    u[i][j] =  x * cosine + y * sine;
+                    u[i][k] = -x * sine   + y * cosine;
+                }
+                s[j][j] = _abs(cosine) * ej + _abs(sine)   * ek;
+                s[k][k] = _abs(sine)   * ej + _abs(cosine) * ek;
+                for (int i = 0; i < n; i++) {
+                    T x = v[i][j];
+                    T y = v[i][k];
+
+                    v[i][j] =  x * cosine + y * sine;
+                    v[i][k] = -x * sine   + y * cosine;
+                }
+            }
+        }
+        sweep++;
+    }
+
+    double plength = T(-1);
+
+    for (int i = 0; i < n; i++) {
+        Vector<T, n> uc(u.col(i));
+        T length = norm(uc);
+
+        if (length == T(0) || plength == T(0) || (i > 0 && length <= tolerance * plength)) {
+            s[i][i] = 0;
+            uc.zeros();
+            plength = T(0);
+        } else {
+            s[i][i] = length;
+            uc /= length;
+            plength = length;
+        }
+        u.col(i, uc);
+    }
 }
 
 template<typename T, int n>
@@ -893,7 +1048,7 @@ Matrix<T, n, n> inverse(const Matrix<T, n, n> &mat) {
     Matrix<T, n, n> dst(cofactors(mat));
     T det = dst.row(0).dot(mat.row(0));
 
-    if (det != T(0)) {
+    if (!_eq(det, T(0))) {
         transpose(dst);
         dst *= T(1) / det;
     } else {
@@ -901,13 +1056,14 @@ Matrix<T, n, n> inverse(const Matrix<T, n, n> &mat) {
 
         svd(mat, u, s, v);
         for (int i = n - 1; i >= 0; i--) {
-            if (!equals(s[i][i], T(0))) {
+            if (_ne0(s[i][i])) {
                 s[i][i] = T(1) / s[i][i];
             } else {
                 s[i][i] = T(0);
             }
         }
-        dst = v * s * v.transpose();
+        transpose(v);
+        dst = u * s * v;
     }
     return dst;
 }
