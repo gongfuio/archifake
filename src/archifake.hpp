@@ -49,6 +49,7 @@
 #include <GL/glxext.h>
 #include <GL/gl.h>
 
+#include <algorithm>
 #include <list>
 #include <map>
 #include <memory>
@@ -82,7 +83,10 @@ typedef double                  f64;
 // program headers
 #include "utils/clock.hpp"
 #include "utils/math.hpp"
+#include "utils/math_transforms.hpp"
 #include "utils/buffer.hpp"
+#include "utils/shader.hpp"
+#include "scene/camera.hpp"
 #include "scene/surface.hpp"
 #include "scene/scene.hpp"
 #include "window.hpp"

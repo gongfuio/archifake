@@ -39,22 +39,22 @@
 
 
 template<typename T>
-inline T _eps(T scale = T(1)) {
+inline T _eps(const T &scale = T(1)) {
     return T(0);
 }
 
 template<>
-inline float _eps<float>(float scale) {
+inline float _eps<float>(const float &scale) {
     return EPS_FLOAT * scale;
 }
 
 template<>
-inline double _eps<double>(double scale) {
+inline double _eps<double>(const double &scale) {
     return EPS_DOUBLE * scale;
 }
 
 template<>
-inline long double _eps<long double>(long double scale) {
+inline long double _eps<long double>(const long double &scale) {
     return EPS_LONG_DOUBLE * scale;
 }
 
@@ -111,33 +111,124 @@ inline long double _hypot(long double a, long double b) {
 }
 
 
+inline float _sin(float value) {
+    return sinf(value);
+}
+
+inline double _sin(double value) {
+    return sin(value);
+}
+
+inline long double _sin(long double value) {
+    return sinl(value);
+}
+
+
+inline float _asin(float value) {
+    return asinf(value);
+}
+
+inline double _asin(double value) {
+    return asin(value);
+}
+
+inline long double _asin(long double value) {
+    return asinl(value);
+}
+
+
+inline float _cos(float value) {
+    return cosf(value);
+}
+
+inline double _cos(double value) {
+    return cos(value);
+}
+
+inline long double _cos(long double value) {
+    return cosl(value);
+}
+
+
+inline float _acos(float value) {
+    return acosf(value);
+}
+
+inline double _acos(double value) {
+    return acos(value);
+}
+
+inline long double _acos(long double value) {
+    return acosl(value);
+}
+
+
+inline float _tan(float value) {
+    return tanf(value);
+}
+
+inline double _tan(double value) {
+    return tan(value);
+}
+
+inline long double _tan(long double value) {
+    return tanl(value);
+}
+
+
+inline float _atan(float value) {
+    return atanf(value);
+}
+
+inline double _atan(double value) {
+    return atan(value);
+}
+
+inline long double _atan(long double value) {
+    return atanl(value);
+}
+
+
+inline float _atan2(float y, float x) {
+    return atan2f(y, x);
+}
+
+inline double _atan2(double y, double x) {
+    return atan2(y, x);
+}
+
+inline long double _atan2(long double y, long double x) {
+    return atan2l(y, x);
+}
+
+
 template<typename T>
-inline bool _eq(T a, T b) {
+inline bool _eq(const T &a, const T &b) {
     return _abs(a - b) <= _eps<T>(T(100));
 }
 
 template<typename T>
-inline bool _ne(T a, T b) {
+inline bool _ne(const T &a, const T &b) {
     return !_eq(a, b);
 }
 
 template<typename T>
-inline bool _eq0(T a) {
+inline bool _eq0(const T &a) {
     return _eq(a, T(0));
 }
 
 template<typename T>
-inline bool _eq1(T a) {
+inline bool _eq1(const T &a) {
     return _eq(a, T(1));
 }
 
 template<typename T>
-inline bool _ne0(T a) {
+inline bool _ne0(const T &a) {
     return !_eq0(a);
 }
 
 template<typename T>
-inline bool _ne1(T a) {
+inline bool _ne1(const T &a) {
     return !_eq1(a);
 }
 
@@ -201,6 +292,11 @@ public:
     }
 
 
+    inline operator const T * () const {
+        return this->data;
+    }
+
+
     inline T & operator [] (int i) {
         return this->data[i];
     }
@@ -250,7 +346,7 @@ public:
         return dst;
     }
 
-    Vector<T, n> operator * (T scalar) const {
+    Vector<T, n> operator * (const T &scalar) const {
         Vector<T, n> dst;
 
         for (int i = n - 1; i >= 0; i--) {
@@ -259,27 +355,28 @@ public:
         return dst;
     }
 
-    Vector<T, n> & operator *= (T scalar) {
+    Vector<T, n> & operator *= (const T &scalar) {
         for (int i = n - 1; i >= 0; i--) {
             this->data[i] *= scalar;
         }
         return *this;
     }
 
-    Vector<T, n> operator / (T scalar) const {
+    Vector<T, n> operator / (const T &scalar) const {
         Vector<T, n> dst;
+        T scalarInverse(T(1) / scalar);
 
-        scalar = T(1) / scalar;
         for (int i = n - 1; i >= 0; i--) {
-            dst[i] = this->data[i] * scalar;
+            dst[i] = this->data[i] * scalarInverse;
         }
         return dst;
     }
 
-    Vector<T, n> & operator /= (T scalar) {
-        scalar = T(1) / scalar;
+    Vector<T, n> & operator /= (const T &scalar) {
+        T scalarInverse(T(1) / scalar);
+
         for (int i = n - 1; i >= 0; i--) {
-            this->data[i] *= scalar;
+            this->data[i] *= scalarInverse;
         }
         return *this;
     }
@@ -350,7 +447,7 @@ public:
     }
 
 
-    void fill(T value) {
+    void fill(const T &value) {
         for (int i = n - 1; i >= 0; i--) {
             this->data[i] = value;
         }
@@ -383,7 +480,7 @@ public:
 
 
     T dot(const Vector<T, n> &vec) const {
-        T value = 0;
+        T value(0);
 
         for (int i = n - 1; i >= 0; i--) {
             value += this->data[i] * vec[i];
@@ -425,21 +522,21 @@ public:
 
 
 template<typename T>
-inline Vector<T, 2> Vector2(T x, T y) {
+inline Vector<T, 2> Vector2(const T &x, const T &y) {
     T data[2] = { x, y };
 
     return Vector<T, 2>(data);
 }
 
 template<typename T>
-inline Vector<T, 3> Vector3(T x, T y, T z) {
+inline Vector<T, 3> Vector3(const T &x, const T &y, const T &z) {
     T data[3] = { x, y, z };
 
     return Vector<T, 3>(data);
 }
 
 template<typename T>
-inline Vector<T, 4> Vector4(T x, T y, T z, T w) {
+inline Vector<T, 4> Vector4(const T &x, const T &y, const T &z, const T &w) {
     T data[4] = { x, y, z, w };
 
     return Vector<T, 4>(data);
@@ -453,7 +550,7 @@ inline T norm(const Vector<T, n> &vec) {
 
 template<typename T, int n>
 Vector<T, n> normalize(const Vector<T, n> &vec) {
-    T length = (T)norm(vec);
+    const T length(norm(vec));
 
     if (_ne0(length)) {
         return vec / length;
@@ -591,7 +688,7 @@ public:
         return dst;
     }
 
-    Matrix<T, m, n> operator * (T scalar) const {
+    Matrix<T, m, n> operator * (const T &scalar) const {
         Matrix<T, m, n> dst;
 
         for (int i = m - 1; i >= 0; i--) {
@@ -600,27 +697,28 @@ public:
         return dst;
     }
 
-    Matrix<T, m, n> & operator *= (T scalar) {
+    Matrix<T, m, n> & operator *= (const T &scalar) {
         for (int i = m - 1; i >= 0; i--) {
             this->data[i] *= scalar;
         }
         return *this;
     }
 
-    Matrix<T, m, n> operator / (T scalar) const {
+    Matrix<T, m, n> operator / (const T &scalar) const {
         Matrix<T, m, n> dst;
+        T scalarInverse(T(1) / scalar);
 
-        scalar = T(1) / scalar;
         for (int i = m - 1; i >= 0; i--) {
-            dst[i] = this->data[i] * scalar;
+            dst[i] = this->data[i] * scalarInverse;
         }
         return dst;
     }
 
-    Matrix<T, m, n> & operator /= (T scalar) {
-        scalar = T(1) / scalar;
+    Matrix<T, m, n> & operator /= (const T &scalar) {
+        T scalarInverse(T(1) / scalar);
+
         for (int i = m - 1; i >= 0; i--) {
-            this->data[i] *= scalar;
+            this->data[i] *= scalarInverse;
         }
         return *this;
     }
@@ -680,7 +778,7 @@ public:
     }
 
 
-    void fill(T value) {
+    void fill(const T &value) {
         for (int i = m - 1; i >= 0; i--) {
             for (int j = n - 1; j >= 0; j--) {
                 this->data[i][j] = value;
@@ -809,7 +907,7 @@ public:
                 if (j > 0) {
                     printf(" ");
                 }
-                printf("%.05f", this->data[i][j]);
+                printf("%.05f", (double)this->data[i][j]);
             }
             printf("\n");
         }
@@ -818,7 +916,7 @@ public:
 
 
 template<typename T>
-inline Matrix<T, 2, 2> Matrix2x2(T m11, T m12, T m21, T m22) {
+inline Matrix<T, 2, 2> Matrix2x2(const T &m11, const T &m12, const T &m21, const T &m22) {
     T data[2][2] = {
         { m11, m12 },
         { m21, m22 }
@@ -828,7 +926,7 @@ inline Matrix<T, 2, 2> Matrix2x2(T m11, T m12, T m21, T m22) {
 }
 
 template<typename T>
-inline Matrix<T, 3, 3> Matrix3x3(T m11, T m12, T m13, T m21, T m22, T m23, T m31, T m32, T m33) {
+inline Matrix<T, 3, 3> Matrix3x3(const T &m11, const T &m12, const T &m13, const T &m21, const T &m22, const T &m23, const T &m31, const T &m32, const T &m33) {
     T data[3][3] = {
         { m11, m12, m13 },
         { m21, m22, m23 },
@@ -839,7 +937,7 @@ inline Matrix<T, 3, 3> Matrix3x3(T m11, T m12, T m13, T m21, T m22, T m23, T m31
 }
 
 template<typename T>
-inline Matrix<T, 4, 4> Matrix4x4(T m11, T m12, T m13, T m14, T m21, T m22, T m23, T m24, T m31, T m32, T m33, T m34, T m41, T m42, T m43, T m44) {
+inline Matrix<T, 4, 4> Matrix4x4(const T &m11, const T &m12, const T &m13, const T &m14, const T &m21, const T &m22, const T &m23, const T &m24, const T &m31, const T &m32, const T &m33, const T &m34, const T &m41, const T &m42, const T &m43, const T &m44) {
     T data[4][4] = {
         { m11, m12, m13, m14 },
         { m21, m22, m23, m24 },
@@ -867,7 +965,7 @@ void transpose(Matrix<T, n, n> &mat) {
                 int bucket2 = (bit2 - bit2 % 8) >> 3;
 
                 if (((flags[bucket1] & 1 << (bit1 % 8)) | (flags[bucket2] & 1 << (bit2 % 8))) == 0) {
-                    T tmp = mat[i][j];
+                    T tmp(mat[i][j]);
 
                     mat[i][j] = mat[j][i];
                     mat[j][i] = tmp;
@@ -882,7 +980,7 @@ void transpose(Matrix<T, n, n> &mat) {
 
 template<typename T, int n>
 T trace(const Matrix<T, n, n> &mat) {
-    T dst = T(0);
+    T dst(0);
 
     for (int i = n - 1; i >= 0; i--) {
         dst += mat[i][i];
@@ -921,7 +1019,7 @@ Matrix<T, m, n> orthonormalize(const Matrix<T, m, n> &mat) {
     Matrix<T, m, n> dst(mat);
 
     for (int i = 0; i < m; i++) {
-        T length = norm(dst[i]);
+        T length(norm(dst[i]));
 
         if (_ne0(length)) {
             dst[i] /= length;
@@ -940,7 +1038,7 @@ void qr(const Matrix<T, n, n> &mat, Matrix<T, n, n> &q, Matrix<T, n, n> &r) {
     q = mat.transpose();
     r.zeros();
     for (int i = 0; i < n; i++) {
-        T length = norm(q[i]);
+        T length(norm(q[i]));
 
         if (_ne0(length)) {
             q[i] /= length;
@@ -961,7 +1059,7 @@ void qr(const Matrix<T, n, n> &mat, Matrix<T, n, n> &q, Matrix<T, n, n> &r) {
 template<typename T, int n>
 void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Matrix<T, n, n> &v) {
     const int sweepmax = _max(12, 5 * n);
-    const T tolerance = _eps<T>(T(10 * n));
+    const T tolerance(_eps<T>(T(10 * n)));
     int count = 1;
     int sweep = 0;
 
@@ -977,21 +1075,21 @@ void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Mat
             for (int k = j + 1; k < n; k++) {
                 const Vector<T, n> &cj(u.col(j));
                 const Vector<T, n> &ck(u.col(k));
-                T ej = s[j][j];
-                T ek = s[k][k];
-                T aj = norm(cj);
-                T ak = norm(ck);
-                T alpha = T(2) * cj.dot(ck);
+                const T ej(s[j][j]);
+                const T ek(s[k][k]);
+                const T aj(norm(cj));
+                const T ak(norm(ck));
+                const T alpha(T(2) * cj.dot(ck));
 
                 if (aj >= ak && (_abs(alpha) <= (tolerance * aj * ak) || aj < ej || ak < ek)) {
                     count--;
                     continue;
                 }
 
-                T beta = aj * aj - ak * ak;
-                T gamma = _hypot(alpha, beta);
-                T cosine = T(0);
-                T sine = T(1);
+                const T beta(aj * aj - ak * ak);
+                const T gamma(_hypot(alpha, beta));
+                T cosine(0);
+                T sine(1);
 
                 if (_ne0(gamma)) {
                     if (beta > 0) {
@@ -1004,8 +1102,8 @@ void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Mat
                 }
 
                 for (int i = 0; i < n; i++) {
-                    T x = u[i][j];
-                    T y = u[i][k];
+                    const T x(u[i][j]);
+                    const T y(u[i][k]);
 
                     u[i][j] =  x * cosine + y * sine;
                     u[i][k] = -x * sine   + y * cosine;
@@ -1013,8 +1111,8 @@ void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Mat
                 s[j][j] = _abs(cosine) * ej + _abs(sine)   * ek;
                 s[k][k] = _abs(sine)   * ej + _abs(cosine) * ek;
                 for (int i = 0; i < n; i++) {
-                    T x = v[i][j];
-                    T y = v[i][k];
+                    const T x(v[i][j]);
+                    const T y(v[i][k]);
 
                     v[i][j] =  x * cosine + y * sine;
                     v[i][k] = -x * sine   + y * cosine;
@@ -1024,14 +1122,14 @@ void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Mat
         sweep++;
     }
 
-    double plength = T(-1);
+    T plength(-1);
 
     for (int i = 0; i < n; i++) {
         Vector<T, n> uc(u.col(i));
-        T length = norm(uc);
+        T length(norm(uc));
 
         if (length == T(0) || plength == T(0) || (i > 0 && length <= tolerance * plength)) {
-            s[i][i] = 0;
+            s[i][i] = T(0);
             uc.zeros();
             plength = T(0);
         } else {
@@ -1046,7 +1144,7 @@ void svd(const Matrix<T, n, n> &mat, Matrix<T, n, n> &u, Matrix<T, n, n> &s, Mat
 template<typename T, int n>
 Matrix<T, n, n> inverse(const Matrix<T, n, n> &mat) {
     Matrix<T, n, n> dst(cofactors(mat));
-    T det = dst.row(0).dot(mat.row(0));
+    T det(dst.row(0).dot(mat.row(0)));
 
     if (!_eq(det, T(0))) {
         transpose(dst);
@@ -1067,6 +1165,94 @@ Matrix<T, n, n> inverse(const Matrix<T, n, n> &mat) {
     }
     return dst;
 }
+
+
+template<typename T>
+class Range {
+public:
+    const T minimum;
+    const T maximum;
+
+
+    inline Range() : minimum(T(0)), maximum(T(0)) {
+    }
+
+    inline Range(const T &minimum, const T &maximum) : minimum(minimum), maximum(maximum) {
+    }
+
+    inline Range(const Range<T> &range) : minimum(range.minimum), maximum(range.maximum) {
+    }
+
+
+    int operator ==(const Range<T> &range) const {
+        return (_eq(this->minimum, range.minimum) && _eq(this->maximum, range.maximum));
+    }
+
+    inline int operator !=(const Range<T> &range) const {
+        return !(*this == range);
+    }
+
+
+    inline bool isInside(const T &value) const {
+        return (this->minimum <= value && value <= this->maximum);
+    }
+
+    inline bool isOutside(const T &value) const {
+        return !this->isInside(value);
+    }
+};
+
+
+template<typename T>
+class Rectangle2 {
+public:
+    typedef Vector<T, 2> V2;
+
+
+public:
+    const V2 tl;
+    const V2 br;
+
+
+    inline Rectangle2() {
+    }
+
+    inline Rectangle2(const T &x1, const T &y1, const T &x2, const T &y2) : tl(Vector2(_min(x1, x2), _min(y1, y2))), br(Vector2(_max(x1, x2), _max(y1, y2))) {
+    }
+
+    inline Rectangle2(const V2 &tl, const V2 &br) : tl(Vector2(_min(tl[0], br[0]), _min(tl[1], br[1]))), br(Vector2(_max(tl[0], br[0]), _max(tl[1], br[1]))) {
+    }
+
+    inline Rectangle2(const Rectangle2<T> &rect) : tl(rect.tl), br(rect.br) {
+    }
+
+
+    int operator ==(const Rectangle2<T> &rect) const {
+        return (this->tl == rect.tl && this->br == rect.br);
+    }
+
+    inline int operator !=(const Rectangle2<T> &rect) const {
+        return !(*this == rect);
+    }
+
+
+    inline T width() const {
+        return this->br[0] - this->tl[0];
+    }
+
+    inline T height() const {
+        return this->br[1] - this->tl[1];
+    }
+
+
+    inline bool isInside(const V2 &p) const {
+        return (this->tl[0] <= p[0] && p[0] <= this->br[0] && this->tl[1] <= p[1] && p[1] <= this->br[1]);
+    }
+
+    inline bool isOutside(const V2 &p) const {
+        return !this->isInside(p);
+    }
+};
 
 
 #endif //__MATH_H_INCLUDE__

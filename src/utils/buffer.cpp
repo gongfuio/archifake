@@ -23,37 +23,33 @@
 #include "archifake.hpp"
 
 
-Buffer::Buffer(GLenum target, GLenum usage) : target(target), usage(usage), enabled(0) {
-    glGenBuffers(1, &this->buffer);
+Buffer::Buffer(GLenum target, i32u size, const GLvoid *data, GLenum usage) : id(GL_ZERO), enabled(0), target(target), size(size), usage(usage) {
+    glGenBuffers(1, &this->id);
+
+    glBindBuffer(this->target, this->id);
+    glBufferData(this->target, size, data, this->usage);
+    glBindBuffer(this->target, GL_ZERO);
+}
+
+Buffer::Buffer(const Buffer &buffer) : id(GL_ZERO), enabled(0), target(buffer.target), size(buffer.size), usage(buffer.usage) {
+    glGenBuffers(1, &this->id);
+    if (this->size > 0) {
+        glBindBuffer(GL_COPY_READ_BUFFER, buffer.id);
+        glBindBuffer(GL_COPY_WRITE_BUFFER, this->id);
+        glBufferData(GL_COPY_WRITE_BUFFER, this->size, NULL, this->usage);
+        glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, this->size);
+        glBindBuffer(GL_COPY_WRITE_BUFFER, GL_ZERO);
+        glBindBuffer(GL_COPY_READ_BUFFER, GL_ZERO);
+    }
 }
 
 Buffer::~Buffer() {
-    glDeleteBuffers(1, &this->buffer);
+    glDeleteBuffers(1, &this->id);
 }
-
-
-void Buffer::init(GLsizeiptr size, GLvoid *data) {
-    this->enable();
-    glBufferData(this->target, size, data, this->usage);
-    this->disable();
-}
-
-void Buffer::update(GLintptr offset, GLsizeiptr size, GLvoid *data) {
-    this->enable();
-    glBufferSubData(this->target, offset, size, data);
-    this->disable();
-}
-
-void Buffer::free() {
-    this->enable();
-    glBufferData(this->target, 0, NULL, this->usage);
-    this->disable();
-}
-
 
 void Buffer::enable() {
     if (this->enabled == 0) {
-        glBindBuffer(this->target, this->buffer);
+        glBindBuffer(this->target, this->id);
     }
     this->enabled++;
 }
@@ -65,28 +61,46 @@ void Buffer::disable() {
     }
 }
 
-
-void VertexAttributeBuffer::setVertex(i32u vertexOffset, GLvoid *data) {
+void Buffer::getData(i32u offset, i32u size, GLvoid *data) {
     this->enable();
-    glBufferSubData(this->target, vertexOffset * this->stride, this->stride, data);
+
+    glGetBufferSubData(this->target, offset, size, data);
+
     this->disable();
 }
 
-void VertexAttributeBuffer::setVertices(i32u vertexOffset, i32u vertexCount, GLvoid *data) {
+void Buffer::setData(i32u offset, i32u size, const GLvoid *data) {
     this->enable();
-    glBufferSubData(this->target, vertexOffset * this->stride, vertexCount * this->stride, data);
+
+    glBufferSubData(this->target, offset, size, data);
+
     this->disable();
 }
 
-
-void ElementBuffer::setElement(i32u elementOffset, GLvoid *data) {
-    this->enable();
-    glBufferSubData(this->target, elementOffset * this->vertexCount * this->indexSize, this->vertexCount * this->indexSize, data);
-    this->disable();
+GLvoid* Buffer::map(i32u access) {
+    if (this->enabled == 0) {
+        return NULL;
+    }
+    return glMapBuffer(this->target, access);
 }
 
-void ElementBuffer::setElements(i32u elementOffset, i32u elementCount, GLvoid *data) {
-    this->enable();
-    glBufferSubData(this->target, elementOffset * this->vertexCount * this->indexSize, elementCount * this->vertexCount * this->indexSize, data);
-    this->disable();
+GLvoid* Buffer::map(i32u offset, i32u size, i32u access) {
+    if (this->enabled == 0) {
+        return NULL;
+    }
+    return glMapBufferRange(this->target, offset, size, access);
+}
+
+void Buffer::flush(i32u offset, i32u size) {
+    if (this->enabled == 0) {
+        return;
+    }
+    glFlushMappedBufferRange(this->target, offset, size);
+}
+
+void Buffer::unmap() {
+    if (this->enabled == 0) {
+        return;
+    }
+    glUnmapBuffer(this->target);
 }
