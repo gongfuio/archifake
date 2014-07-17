@@ -53,9 +53,9 @@ void SurfaceTask::show() {
     }
 }
 
-void SurfaceTask::render() {
+void SurfaceTask::render(const shared_ptr<Renderer> &renderer) {
     if (this->visible) {
-        this->surface->render();
+        this->surface->render(renderer);
         this->renderCount++;
     }
 }
@@ -103,9 +103,9 @@ void Scene::show(const string &name) {
     this->surfaces[name].show();
 }
 
-void Scene::render() {
+void Scene::render(const shared_ptr<Renderer> &renderer) {
     for (auto it = this->surfaces.begin(); it != this->surfaces.end(); it++) {
-        (*it).second.render();
+        (*it).second.render(renderer);
     }
 }
 

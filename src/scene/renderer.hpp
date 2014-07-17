@@ -20,41 +20,18 @@
 
 */
 
-#ifndef __SURFACE_H_INCLUDE__
-#define __SURFACE_H_INCLUDE__
+#ifndef __RENDERER_H_INCLUDE__
+#define __RENDERER_H_INCLUDE__
 
 
-class Surface {
+class Renderer {
 public:
-    Surface() {
+    shared_ptr<Camera> camera;
+
+
+    Renderer() {
     }
-
-    virtual ~Surface() {
-    }
-
-
-    virtual void animate(f64 t, f64 dt);
-    virtual void render(const shared_ptr<Renderer> &renderer);
 };
 
 
-class FlatSurface : public Surface {
-protected:
-    shared_ptr<ShaderProgram> program;
-
-    VertexAttributeBufferV<double, 2> vertices;
-
-    ElementBuffer<i8u, 3> triangles;
-
-
-public:
-    FlatSurface(const shared_ptr<ShaderProgram> &program);
-    virtual ~FlatSurface();
-
-
-    virtual void animate(f64 t, f64 dt);
-    virtual void render(const shared_ptr<Renderer> &renderer);
-};
-
-
-#endif //__SURFACE_H_INCLUDE__
+#endif //__RENDERER_H_INCLUDE__

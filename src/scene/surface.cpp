@@ -26,5 +26,32 @@
 void Surface::animate(f64 t, f64 dt) {
 }
 
-void Surface::render() {
+void Surface::render(const shared_ptr<Renderer> &renderer) {
+}
+
+
+FlatSurface::FlatSurface(const shared_ptr<ShaderProgram> &program) : Surface(), program(program), vertices(4), triangles(2) {
+    this->vertices.setVertex(0, Vector2<double>( 0.5,  0.5));
+    this->vertices.setVertex(1, Vector2<double>(-0.5,  0.5));
+    this->vertices.setVertex(2, Vector2<double>(-0.5, -0.5));
+    this->vertices.setVertex(3, Vector2<double>( 0.5, -0.5));
+
+    this->triangles.setFace(0, {0, 1, 2});
+    this->triangles.setFace(1, {2, 3, 0});
+}
+
+FlatSurface::~FlatSurface() {
+}
+
+void FlatSurface::animate(f64 t, f64 dt) {
+}
+
+void FlatSurface::render(const shared_ptr<Renderer> &renderer) {
+    this->vertices.enable();
+    this->triangles.enable();
+    this->program->enable();
+
+    this->program->disable();
+    this->triangles.disable();
+    this->vertices.disable();
 }

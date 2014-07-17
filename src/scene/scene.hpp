@@ -56,7 +56,7 @@ public:
 
 
     void show();
-    void render();
+    void render(const shared_ptr<Renderer> &renderer);
     void hide();
 };
 
@@ -82,7 +82,7 @@ public:
 
     void showAll();
     void show(const string &name);
-    void render();
+    void render(const shared_ptr<Renderer> &renderer);
     void hide(const string &name);
     void hideAll();
 

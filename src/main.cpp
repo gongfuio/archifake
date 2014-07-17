@@ -42,6 +42,39 @@ void run(Display *display, Screen *screen) {
     // setup clock
     Clock::setup();
 
+    // setup demo scene
+    const char *vertexShaderSource =
+        R"(#version 420 core
+
+        uniform mat4 pvmMatrix;
+        in vec3 inPosition;
+
+        void main(void) {
+            gl_Position = pvmMatrix * vec4(inPosition, 1.0);
+        }
+        )";
+    shared_ptr<Shader> vertexShader(new Shader(GL_VERTEX_SHADER, vertexShaderSource));
+    const char *fragmentShaderSource =
+        R"(#version 420 core
+
+        out vec4 gl_FragColor;
+
+        void main(void) {
+            gl_FragColor = rgba(1.0, 1.0, 1.0, 1.0);
+        }
+        )";
+    shared_ptr<Shader> fragmentShader(new Shader(GL_FRAGMENT_SHADER, fragmentShaderSource));
+    shared_ptr<ShaderProgram> program(new ShaderProgram(vertexShader, fragmentShader));
+    shared_ptr<Surface> surface0(new FlatSurface(program));
+    shared_ptr<Renderer> renderer(new Renderer());
+
+    scene.addSurface("surface0", surface0);
+
+    printf("vertexShader: %s\n", vertexShader->getLogs().c_str());
+    printf("fragmentShader: %s\n", fragmentShader->getLogs().c_str());
+    printf("program(linker): %s\n", program->getLinkerLogs().c_str());
+    printf("program(validator): %s\n", program->getValidatorLogs().c_str());
+
     // event loop
     lastDraw = Clock::tick();
     while (window.exists()) {
@@ -52,7 +85,7 @@ void run(Display *display, Screen *screen) {
             lastDraw = Clock::tick();
             window.beginFrame();
             scene.animate();
-            scene.render();
+            scene.render(renderer);
         }
         while (XPending(display)) {
             XEvent xev;

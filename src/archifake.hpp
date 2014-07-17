@@ -87,6 +87,7 @@ typedef double                  f64;
 #include "utils/buffer.hpp"
 #include "utils/shader.hpp"
 #include "scene/camera.hpp"
+#include "scene/renderer.hpp"
 #include "scene/surface.hpp"
 #include "scene/scene.hpp"
 #include "window.hpp"

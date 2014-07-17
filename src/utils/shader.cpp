@@ -23,7 +23,7 @@
 #include "archifake.hpp"
 
 
-Shader::Shader(i32u type, const std::string &source) : id(GL_ZERO), compiled(false), type(type), source(source) {
+Shader::Shader(i32u type, const string &source) : id(GL_ZERO), compiled(false), type(type), source(source) {
     this->id = glCreateShader(type);
     if (this->id == GL_ZERO) {
         return;
@@ -50,37 +50,55 @@ Shader::Shader(i32u type, const std::string &source) : id(GL_ZERO), compiled(fal
         }
     }
     {
-        std::vector<char> buffer;
+        vector<char> buffer;
         GLint length = 0;
 
         glGetShaderiv(this->id, GL_INFO_LOG_LENGTH, &length);
         buffer.reserve(_max(length, 1));
         glGetShaderInfoLog(this->id, length, &length, buffer.data());
         buffer[length] = '\0';
-        this->logs = std::string(buffer.begin(), buffer.begin() + length);
+        this->logs = string(buffer.begin(), buffer.begin() + length);
     }
 }
 
 Shader::~Shader() {
-    glDeleteShader(this->id);
+    if (this->id != GL_ZERO) {
+        glDeleteShader(this->id);
+    }
 }
 
 bool Shader::isCompiled() const {
     return this->compiled;
 }
 
-const std::string & Shader::getLogs() const {
+const string & Shader::getLogs() const {
     return this->logs;
 }
 
 
-ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders) {
+ShaderProgram::ShaderProgram(const shared_ptr<Shader> &vertexShader, const shared_ptr<Shader> &fragmentShader) {
+    list<shared_ptr<Shader >> shaders;
+
+    shaders.push_back(vertexShader);
+    shaders.push_back(fragmentShader);
+    this->link(shaders);
+}
+
+ShaderProgram::ShaderProgram(const list<shared_ptr<Shader> > &shaders) {
+    this->link(shaders);
+}
+
+ShaderProgram::~ShaderProgram() {
+    glDeleteProgram(this->id);
+}
+
+void ShaderProgram::link(const list<shared_ptr<Shader> > &shaders) {
     this->id = glCreateProgram();
     if (this->id == GL_ZERO) {
         return;
     }
 
-    std::for_each(shaders.begin(), shaders.end(), [&] (const std::shared_ptr<Shader> &shader) {
+    for_each(shaders.begin(), shaders.end(), [&] (const shared_ptr<Shader> &shader) {
         if (shader && shader->isCompiled()) {
             glAttachShader(this->id, shader->id);
         }
@@ -96,14 +114,14 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
         }
     }
     {
-        std::vector<char> buffer;
+        vector<char> buffer;
         GLint length = 0;
 
         glGetProgramiv(this->id, GL_INFO_LOG_LENGTH, &length);
         buffer.reserve(_max(length, 1));
         glGetProgramInfoLog(this->id, length, &length, buffer.data());
         buffer[length] = '\0';
-        this->linkerLogs = std::string(buffer.begin(), buffer.begin() + length);
+        this->linkerLogs = string(buffer.begin(), buffer.begin() + length);
     }
 
     glValidateProgram(this->id);
@@ -116,33 +134,33 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
         }
     }
     {
-        std::vector<char> buffer;
+        vector<char> buffer;
         GLint length = 0;
 
         glGetProgramiv(this->id, GL_INFO_LOG_LENGTH, &length);
         buffer.reserve(_max(length, 1));
         glGetProgramInfoLog(this->id, length, &length, buffer.data());
         buffer[length] = '\0';
-        this->validatorLogs = std::string(buffer.begin(), buffer.begin() + length);
+        this->validatorLogs = string(buffer.begin(), buffer.begin() + length);
     }
 
     {
-        std::vector<std::string > blockNames;
-        std::vector<GLuint> indices;
-        std::vector<GLint> blocks;
-        std::vector<GLint> offsets;
-        std::vector<GLint> arrayStrides;
-        std::vector<GLint> matrixStrides;
-        std::vector<GLint> rowMajors;
-        std::vector<GLint> atomicCounters;
-        std::vector<char> buffer;
+        vector<string > blockNames;
+        vector<GLuint> indices;
+        vector<GLint> blocks;
+        vector<GLint> offsets;
+        vector<GLint> arrayStrides;
+        vector<GLint> matrixStrides;
+        vector<GLint> rowMajors;
+        vector<GLint> atomicCounters;
+        vector<char> buffer;
         GLint count = 0;
 
         glGetProgramiv(this->id, GL_ACTIVE_UNIFORM_BLOCKS, &count);
         blockNames.reserve(count);
         for (GLint i = 0; i < count; i++) {
             GLint length = 0;
-            std::string name;
+            string name;
             GLint size = 0;
             GLint uniforms = 0;
             GLint location = 0;
@@ -151,7 +169,7 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
             buffer.reserve(_max(length, 1));
             glGetActiveUniformBlockName(this->id, i, length, &length, buffer.data());
             buffer[length] = '\0';
-            name = std::string(buffer.begin(), buffer.begin() + length);
+            name = string(buffer.begin(), buffer.begin() + length);
             glGetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
             glGetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
             glGetActiveUniformBlockiv(this->id, i, GL_UNIFORM_BLOCK_BINDING, &location);
@@ -185,17 +203,17 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
         glGetActiveUniformsiv(this->id, count, indices.data(), GL_UNIFORM_ATOMIC_COUNTER_BUFFER_INDEX, atomicCounters.data());
         for (GLint i = 0; i < count; i++) {
             GLint length = 0;
-            std::string name;
+            string name;
             GLint size = 0;
             GLenum type = 0;
             GLint location = 0;
-            std::string blockName;
+            string blockName;
 
             glGetProgramiv(this->id, GL_ACTIVE_UNIFORM_MAX_LENGTH, &length);
             buffer.reserve(_max(length, 1));
             glGetActiveUniform(this->id, i, length, &length, &size, &type, buffer.data());
             buffer[length] = '\0';
-            name = std::string(buffer.begin(), buffer.begin() + length);
+            name = string(buffer.begin(), buffer.begin() + length);
             if (blocks[i] >= 0 && blocks[i] < (GLint)blockNames.size()) {
                 blockName = blockNames[i];
             }
@@ -215,13 +233,13 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
     }
 
     {
-        std::vector<char> buffer;
+        vector<char> buffer;
         GLint count = 0;
 
         glGetProgramiv(this->id, GL_ACTIVE_ATTRIBUTES, &count);
         for (GLint i = 0; i < count; i++) {
             GLint length = 0;
-            std::string name;
+            string name;
             GLint size = 0;
             GLenum type = 0;
             GLint location = 0;
@@ -230,7 +248,7 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
             buffer.reserve(_max(length, 1));
             glGetActiveAttrib(this->id, i, length, &length, &size, &type, buffer.data());
             buffer[length] = '\0';
-            name = std::string(buffer.begin(), buffer.begin() + length);
+            name = string(buffer.begin(), buffer.begin() + length);
             location = glGetAttribLocation(this->id, name.c_str());
 
             this->attributes[name] = {
@@ -243,10 +261,6 @@ ShaderProgram::ShaderProgram(const std::list<std::shared_ptr<Shader> > &shaders)
     }
 }
 
-ShaderProgram::~ShaderProgram() {
-    glDeleteProgram(this->id);
-}
-
 bool ShaderProgram::isLinked() const {
     return this->linked;
 }
@@ -255,11 +269,11 @@ bool ShaderProgram::isValidated() const {
     return this->validated;
 }
 
-const std::string & ShaderProgram::getLinkerLogs() const {
+const string & ShaderProgram::getLinkerLogs() const {
     return this->linkerLogs;
 }
 
-const std::string & ShaderProgram::getValidatorLogs() const {
+const string & ShaderProgram::getValidatorLogs() const {
     return this->validatorLogs;
 }
 
@@ -277,7 +291,7 @@ void ShaderProgram::disable() {
     }
 }
 
-GLint ShaderProgram::uniformLocation(const std::string &name) const {
+GLint ShaderProgram::uniformLocation(const string &name) const {
     auto it = this->uniforms.find(name);
 
     if (it != this->uniforms.end()) {
@@ -286,7 +300,7 @@ GLint ShaderProgram::uniformLocation(const std::string &name) const {
     return -1;
 }
 
-GLint ShaderProgram::attributeLocation(const std::string &name) const {
+GLint ShaderProgram::attributeLocation(const string &name) const {
     auto it = this->attributes.find(name);
 
     if (it != this->attributes.end()) {
@@ -311,11 +325,11 @@ void ShaderProgram::uniform(GLint location, const Vector<i32, 4> &vec) {
     glUniform4i(location, vec[0], vec[1], vec[2], vec[3]);
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<i32> &values) {
+void ShaderProgram::uniform(GLint location, const vector<i32> &values) {
     glUniform1iv(location, values.size(), values.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Vector<i32, 2> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 2> > &values) {
     vector<i32> buffer(values.size() * 2);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -325,7 +339,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Vector<i32, 2> > &
     glUniform2iv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Vector<i32, 3> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 3> > &values) {
     vector<i32> buffer(values.size() * 3);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -336,7 +350,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Vector<i32, 3> > &
     glUniform3iv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Vector<i32, 4> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 4> > &values) {
     vector<i32> buffer(values.size() * 4);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -364,11 +378,11 @@ void ShaderProgram::uniform(GLint location, const Vector<f32, 4> &vec) {
     glUniform4f(location, vec[0], vec[1], vec[2], vec[3]);
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<f32> &values) {
+void ShaderProgram::uniform(GLint location, const vector<f32> &values) {
     glUniform1fv(location, values.size(), values.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Vector<f32, 2> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 2> > &values) {
     vector<f32> buffer(values.size() * 2);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -378,7 +392,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Vector<f32, 2> > &
     glUniform2fv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Vector<f32, 3> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 3> > &values) {
     vector<f32> buffer(values.size() * 3);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -389,7 +403,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Vector<f32, 3> > &
     glUniform3fv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Vector<f32, 4> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 4> > &values) {
     vector<f32> buffer(values.size() * 4);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -491,7 +505,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 4> &matrix, boo
     glUniformMatrix4fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 2, 2> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 2> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 4);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -503,7 +517,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 2, 2> 
     glUniformMatrix2fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 2, 3> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 3> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 6);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -517,7 +531,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 2, 3> 
     glUniformMatrix2x3fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 2, 4> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 4> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 8);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -533,7 +547,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 2, 4> 
     glUniformMatrix2x4fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 3, 2> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 2> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 6);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -547,7 +561,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 3, 2> 
     glUniformMatrix3x2fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 3, 3> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 3> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 9);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -564,7 +578,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 3, 3> 
     glUniformMatrix3fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 3, 4> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 4> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 12);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -584,7 +598,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 3, 4> 
     glUniformMatrix3x4fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 4, 2> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 2> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 8);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -600,7 +614,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 4, 2> 
     glUniformMatrix4x2fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 4, 3> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 3> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 12);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -620,7 +634,7 @@ void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 4, 3> 
     glUniformMatrix4x3fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const std::vector<Matrix<f32, 4, 4> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 4> > &values, bool transpose) {
     vector<f32> buffer(values.size() * 16);
 
     for (i32u i = 0; i < values.size(); i++) {
