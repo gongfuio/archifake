@@ -20,21 +20,41 @@
 
 */
 
-#ifndef __CAMERA_H_INCLUDE__
-#define __CAMERA_H_INCLUDE__
+#ifndef __STL_H_INCLUDE__
+#define __STL_H_INCLUDE__
 
 
-class Camera {
+template<class M>
+class map_key_iterator : public M::iterator {
 public:
-    Rectangle2<i32> viewport;
-    Range<f64> depthRange;
-    Matrix<f32, 4, 4> projectionMatrix;
-    Matrix<f32, 4, 4> viewMatrix;
+    typedef typename M::iterator IT;
+    typedef typename M::value_type::first_type KT;
 
 
-    Camera() : projectionMatrix(IdentityTransform<f32>()), viewMatrix(IdentityTransform<f32>()) {
+    map_key_iterator(const IT &it) : M::iterator(it) {
+    }
+
+
+    KT & operator *() {
+        return IT::operator *().first;
+    }
+};
+
+template<class M>
+class map_key_const_iterator : public M::const_iterator {
+public:
+    typedef typename M::const_iterator IT;
+    typedef typename M::value_type::first_type KT;
+
+
+    map_key_const_iterator(const IT &it) : IT(it) {
+    }
+
+
+    KT & operator *() {
+        return IT::operator *().first;
     }
 };
 
 
-#endif //__CAMERA_H_INCLUDE__
+#endif //__STL_H_INCLUDE__

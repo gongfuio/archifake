@@ -104,8 +104,8 @@ inline Matrix<T, 4, 4> RotateZTransform(const T &angle) {
 template<typename T>
 inline Matrix<T, 4, 4> LookAtTransform(const Vector<T, 3> &direction, const Vector<T, 3> &up) {
     const Vector<T, 3> f(normalize(direction));
-    const Vector<T, 3> s(normalize(f.cross(normalize(up))));
-    const Vector<T, 3> u(normalize(s.cross(f)));
+    const Vector<T, 3> s(normalize(cross(f, normalize(up))));
+    const Vector<T, 3> u(normalize(cross(s, f)));
 
     return Matrix4x4<T>(
         s[0],  u[0], -f[0],  T(0),
@@ -124,9 +124,9 @@ template<typename T>
 inline Matrix<T, 4, 4> LookAroundYTransform(const Vector<T, 3> &center, const T &radius, const T &theta, const T &phi) {
     return LookAtTransform(
         Vector3<T>(
-            center[0] + radius * nmCosf(theta) * nmCosf(phi),
-            center[1] + radius * nmSinf(phi),
-            center[2] + radius * nmSinf(theta) * nmCosf(phi)
+            center[0] + radius * _cos(theta) * _cos(phi),
+            center[1] + radius * _sin(phi),
+            center[2] + radius * _sin(theta) * _cos(phi)
         ),
         center,
         Vector3<T>(T(0), T(1), T(0))

@@ -25,14 +25,23 @@
 
 Buffer::Buffer(GLenum target, i32u size, const GLvoid *data, GLenum usage) : id(GL_ZERO), enabled(0), target(target), size(size), usage(usage) {
     glGenBuffers(1, &this->id);
+    if (this->id == GL_ZERO) {
+        return;
+    }
 
-    glBindBuffer(this->target, this->id);
-    glBufferData(this->target, size, data, this->usage);
-    glBindBuffer(this->target, GL_ZERO);
+    if (this->size > 0) {
+        glBindBuffer(this->target, this->id);
+        glBufferData(this->target, this->size, data, this->usage);
+        glBindBuffer(this->target, GL_ZERO);
+    }
 }
 
 Buffer::Buffer(const Buffer &buffer) : id(GL_ZERO), enabled(0), target(buffer.target), size(buffer.size), usage(buffer.usage) {
     glGenBuffers(1, &this->id);
+    if (this->id == GL_ZERO || buffer.id == GL_ZERO) {
+        return;
+    }
+
     if (this->size > 0) {
         glBindBuffer(GL_COPY_READ_BUFFER, buffer.id);
         glBindBuffer(GL_COPY_WRITE_BUFFER, this->id);
@@ -44,11 +53,16 @@ Buffer::Buffer(const Buffer &buffer) : id(GL_ZERO), enabled(0), target(buffer.ta
 }
 
 Buffer::~Buffer() {
-    glDeleteBuffers(1, &this->id);
+    if (this->id != GL_ZERO) {
+        glDeleteBuffers(1, &this->id);
+    }
 }
 
 void Buffer::enable() {
     if (this->enabled == 0) {
+        if (this->id == GL_ZERO) {
+            return;
+        }
         glBindBuffer(this->target, this->id);
     }
     this->enabled++;

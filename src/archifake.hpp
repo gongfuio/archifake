@@ -53,6 +53,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -81,6 +82,7 @@ typedef double                  f64;
 
 
 // program headers
+#include "utils/stl.hpp"
 #include "utils/clock.hpp"
 #include "utils/math.hpp"
 #include "utils/math_transforms.hpp"

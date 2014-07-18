@@ -26,7 +26,7 @@
 
 class Renderer {
 public:
-    shared_ptr<Camera> camera;
+    Camera camera;
 
 
     Renderer() {

@@ -39,43 +39,50 @@ void run(Display *display, Screen *screen) {
         fprintf(stderr, "ERROR: Cannot activate window!\n");
     }
 
-    // setup clock
-    Clock::setup();
+    // setup glew
+    glewInit();
 
     // setup demo scene
     const char *vertexShaderSource =
-        R"(#version 420 core
+        R"(#version 130
 
         uniform mat4 pvmMatrix;
-        in vec3 inPosition;
+        in vec2 inPosition;
 
         void main(void) {
-            gl_Position = pvmMatrix * vec4(inPosition, 1.0);
+            gl_Position = pvmMatrix * vec4(inPosition, 0.0, 1.0);
         }
         )";
-    shared_ptr<Shader> vertexShader(new Shader(GL_VERTEX_SHADER, vertexShaderSource));
     const char *fragmentShaderSource =
-        R"(#version 420 core
+        R"(#version 130
 
-        out vec4 gl_FragColor;
+        out vec4 outColor;
 
         void main(void) {
-            gl_FragColor = rgba(1.0, 1.0, 1.0, 1.0);
+            outColor = vec4(1.0, 1.0, 1.0, 1.0);
         }
         )";
-    shared_ptr<Shader> fragmentShader(new Shader(GL_FRAGMENT_SHADER, fragmentShaderSource));
-    shared_ptr<ShaderProgram> program(new ShaderProgram(vertexShader, fragmentShader));
+    shared_ptr<ShaderProgram> program(
+        new ShaderProgram(
+            shared_ptr<Shader>(new Shader(GL_VERTEX_SHADER, vertexShaderSource)),
+            shared_ptr<Shader>(new Shader(GL_FRAGMENT_SHADER, fragmentShaderSource))
+        )
+    );
     shared_ptr<Surface> surface0(new FlatSurface(program));
-    shared_ptr<Renderer> renderer(new Renderer());
+
+    program->print();
 
     scene.addSurface("surface0", surface0);
 
-    printf("vertexShader: %s\n", vertexShader->getLogs().c_str());
-    printf("fragmentShader: %s\n", fragmentShader->getLogs().c_str());
-    printf("program(linker): %s\n", program->getLinkerLogs().c_str());
-    printf("program(validator): %s\n", program->getValidatorLogs().c_str());
+    // setup demo renderer
+    shared_ptr<Renderer> renderer(new Renderer());
+
+    renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 1.0, 1000.0);
+    // renderer->camera.viewMatrix = LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 1.0, M_PI / 2, 0.0);
 
     // event loop
+    scene.startAll();
+    scene.showAll();
     lastDraw = Clock::tick();
     while (window.exists()) {
         bool draw = Clock::elapsed(lastDraw) >= frameTime;
@@ -85,6 +92,7 @@ void run(Display *display, Screen *screen) {
             lastDraw = Clock::tick();
             window.beginFrame();
             scene.animate();
+            // renderer.animate();
             scene.render(renderer);
         }
         while (XPending(display)) {
@@ -124,6 +132,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "ERROR: Invalid screen!\n");
         return 1;
     }
+
+    // setup clock
+    Clock::setup();
 
     // execute program
     run(display, screen);

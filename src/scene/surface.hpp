@@ -25,12 +25,21 @@
 
 
 class Surface {
-public:
-    Surface() {
-    }
+protected:
+    GLuint id;
 
-    virtual ~Surface() {
-    }
+    Matrix<f32, 4, 4> modelMatrix;
+
+    shared_ptr<ShaderProgram> program;
+
+
+    virtual void renderImpl(const shared_ptr<Renderer> &renderer) = 0;
+
+
+public:
+    Surface();
+    Surface(const shared_ptr<ShaderProgram> &program);
+    virtual ~Surface();
 
 
     virtual void animate(f64 t, f64 dt);
@@ -40,20 +49,23 @@ public:
 
 class FlatSurface : public Surface {
 protected:
-    shared_ptr<ShaderProgram> program;
-
-    VertexAttributeBufferV<double, 2> vertices;
+    VertexAttributeBufferV<f32, 2> vertices;
 
     ElementBuffer<i8u, 3> triangles;
 
 
+    void setup();
+
+    virtual void renderImpl(const shared_ptr<Renderer> &renderer);
+
+
 public:
+    FlatSurface();
     FlatSurface(const shared_ptr<ShaderProgram> &program);
     virtual ~FlatSurface();
 
 
     virtual void animate(f64 t, f64 dt);
-    virtual void render(const shared_ptr<Renderer> &renderer);
 };
 
 

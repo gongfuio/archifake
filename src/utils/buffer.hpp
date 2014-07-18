@@ -62,68 +62,13 @@ public:
     const i32u stride;
 
 
-    VertexAttributeBuffer(i32u vertexCount, i32u stride, GLenum usage = GL_STATIC_DRAW) : Buffer(GL_ARRAY_BUFFER, this->vertexCount * this->stride, NULL, usage), vertexCount(vertexCount), stride(stride) {
+    VertexAttributeBuffer(i32u vertexCount, i32u stride, GLenum usage = GL_STATIC_DRAW) : Buffer(GL_ARRAY_BUFFER, vertexCount * stride, NULL, usage), vertexCount(vertexCount), stride(stride) {
     }
 
     VertexAttributeBuffer(const VertexAttributeBuffer &buffer) : Buffer(buffer), vertexCount(buffer.vertexCount), stride(buffer.stride) {
     }
 
     virtual ~VertexAttributeBuffer() {
-    }
-};
-
-
-template<typename IT, int vertexCount>
-class ElementBuffer : public Buffer {
-public:
-    typedef struct {
-        IT indices[vertexCount];
-    } F;
-
-
-    const i32u faceCount;
-    const i32u stride;
-
-
-    ElementBuffer(i32u faceCount, GLenum usage = GL_STATIC_DRAW) : Buffer(GL_ELEMENT_ARRAY_BUFFER, faceCount * vertexCount * sizeof(IT), NULL, usage), faceCount(faceCount), stride(vertexCount * sizeof(IT)) {
-    }
-
-    ElementBuffer(const ElementBuffer &buffer) : Buffer(buffer), faceCount(buffer.faceCount), stride(buffer.stride) {
-    }
-
-    virtual ~ElementBuffer() {
-    }
-
-
-    virtual void setFace(i32u faceOffset, const F &face) {
-        this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(faceOffset * this->stride, this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            memcpy(buffer, face.indices, vertexCount * sizeof(IT));
-            buffer += vertexCount * sizeof(IT);
-            this->unmap();
-        }
-        this->disable();
-    }
-    virtual void setFaces(i32u faceOffset, const vector<F> &data) {
-        this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(faceOffset * this->stride, data.size() * this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            for_each(data.begin(), data.end(), [&] (const F &face) {
-                memcpy(buffer, face.indices, vertexCount * sizeof(IT));
-                buffer += vertexCount * sizeof(IT);
-            });
-            this->unmap();
-        }
-        this->disable();
     }
 };
 
@@ -148,32 +93,18 @@ public:
 
     virtual void setVertex(i32u vertexOffset, const V &vertex) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            memcpy(buffer, vertex, vertexCoords * sizeof(VT));
-            buffer += vertexCoords * sizeof(VT);
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        this->setData(vertexOffset, this->stride, vertex);
+        // vertexOffset += this->stride;
         this->disable();
     }
     virtual void setVertices(i32u vertexOffset, const vector<V> &data) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, data.size() * this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            for_each(data.begin(), data.end(), [&] (const V &vertex) {
-                memcpy(buffer, vertex, vertexCoords * sizeof(VT));
-                buffer += vertexCoords * sizeof(VT);
-            });
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        for_each(data.begin(), data.end(), [&] (const V &vertex) {
+            this->setData(vertexOffset, this->stride, vertex);
+            vertexOffset += this->stride;
+        });
         this->disable();
     }
 };
@@ -205,36 +136,22 @@ public:
 
     virtual void setVertex(i32u vertexOffset, const Vertex &vertex) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            memcpy(buffer, vertex.position.data, vertexCoords * sizeof(VT));
-            buffer += vertexCoords * sizeof(VT);
-            memcpy(buffer, vertex.normal.data,   normalCoords * sizeof(NT));
-            buffer += normalCoords * sizeof(NT);
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        this->setData(vertexOffset, vertexCoords * sizeof(VT), vertex.position);
+        vertexOffset += vertexCoords * sizeof(VT);
+        this->setData(vertexOffset, normalCoords * sizeof(NT), vertex.normal);
+        // vertexOffset += normalCoords * sizeof(NT);
         this->disable();
     }
     virtual void setVertices(i32u vertexOffset, const vector<Vertex> &data) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, data.size() * this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            for_each(data.begin(), data.end(), [&] (const Vertex &vertex) {
-                memcpy(buffer, vertex.position.data, vertexCoords * sizeof(VT));
-                buffer += vertexCoords * sizeof(VT);
-                memcpy(buffer, vertex.normal.data,   normalCoords * sizeof(NT));
-                buffer += normalCoords * sizeof(NT);
-            });
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        for_each(data.begin(), data.end(), [&] (const Vertex &vertex) {
+            this->setData(vertexOffset, vertexCoords * sizeof(VT), vertex.position);
+            vertexOffset += vertexCoords * sizeof(VT);
+            this->setData(vertexOffset, normalCoords * sizeof(NT), vertex.normal);
+            vertexOffset += normalCoords * sizeof(NT);
+        });
         this->disable();
     }
 };
@@ -268,40 +185,26 @@ public:
 
     virtual void setVertex(i32u vertexOffset, const Vertex &vertex) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            memcpy(buffer, vertex.position.data, vertexCoords * sizeof(VT));
-            buffer += vertexCoords * sizeof(VT);
-            memcpy(buffer, vertex.normal.data,   normalCoords * sizeof(NT));
-            buffer += normalCoords * sizeof(NT);
-            memcpy(buffer, vertex.color.data,    colorCoords * sizeof(CT));
-            buffer += colorCoords * sizeof(CT);
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        this->setData(vertexOffset, vertexCoords * sizeof(VT), vertex.position);
+        vertexOffset += vertexCoords * sizeof(VT);
+        this->setData(vertexOffset, normalCoords * sizeof(NT), vertex.normal);
+        vertexOffset += normalCoords * sizeof(NT);
+        this->setData(vertexOffset, colorCoords * sizeof(CT), vertex.color);
+        // vertexOffset += colorCoords * sizeof(CT);
         this->disable();
     }
     virtual void setVertices(i32u vertexOffset, const vector<Vertex> &data) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, data.size() * this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            for_each(data.begin(), data.end(), [&] (const Vertex &vertex) {
-                memcpy(buffer, vertex.position.data, vertexCoords * sizeof(VT));
-                buffer += vertexCoords * sizeof(VT);
-                memcpy(buffer, vertex.normal.data,   normalCoords * sizeof(NT));
-                buffer += normalCoords * sizeof(NT);
-                memcpy(buffer, vertex.color.data,    colorCoords * sizeof(CT));
-                buffer += colorCoords * sizeof(CT);
-            });
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        for_each(data.begin(), data.end(), [&] (const Vertex &vertex) {
+            this->setData(vertexOffset, vertexCoords * sizeof(VT), vertex.position);
+            vertexOffset += vertexCoords * sizeof(VT);
+            this->setData(vertexOffset, normalCoords * sizeof(NT), vertex.normal);
+            vertexOffset += normalCoords * sizeof(NT);
+            this->setData(vertexOffset, colorCoords * sizeof(CT), vertex.color);
+            vertexOffset += colorCoords * sizeof(CT);
+        });
         this->disable();
     }
 };
@@ -335,40 +238,67 @@ public:
 
     virtual void setVertex(i32u vertexOffset, const Vertex &vertex) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, this->stride, GL_WRITE_ONLY);
-
-            if (buffer == NULL) {
-                return;
-            }
-            memcpy(buffer, vertex.position.data, vertexCoords * sizeof(VT));
-            buffer += vertexCoords * sizeof(VT);
-            memcpy(buffer, vertex.normal.data,   normalCoords * sizeof(NT));
-            buffer += normalCoords * sizeof(NT);
-            memcpy(buffer, vertex.texture.data,  textureCoords * sizeof(TT));
-            buffer += textureCoords * sizeof(TT);
-            this->unmap();
-        }
+        vertexOffset *= this->stride;
+        this->setData(vertexOffset, vertexCoords * sizeof(VT), vertex.position);
+        vertexOffset += vertexCoords * sizeof(VT);
+        this->setData(vertexOffset, normalCoords * sizeof(NT), vertex.normal);
+        vertexOffset += normalCoords * sizeof(NT);
+        this->setData(vertexOffset, textureCoords * sizeof(TT), vertex.texture);
+        // vertexOffset += textureCoords * sizeof(TT);
         this->disable();
     }
     virtual void setVertices(i32u vertexOffset, const vector<Vertex> &data) {
         this->enable();
-        {
-            i8u *buffer = (i8u*)this->map(vertexOffset * this->stride, data.size() * this->stride, GL_WRITE_ONLY);
+        vertexOffset *= this->stride;
+        for_each(data.begin(), data.end(), [&] (const Vertex &vertex) {
+            this->setData(vertexOffset, vertexCoords * sizeof(VT), vertex.position);
+            vertexOffset += vertexCoords * sizeof(VT);
+            this->setData(vertexOffset, normalCoords * sizeof(NT), vertex.normal);
+            vertexOffset += normalCoords * sizeof(NT);
+            this->setData(vertexOffset, textureCoords * sizeof(TT), vertex.texture);
+            vertexOffset += textureCoords * sizeof(TT);
+        });
+        this->disable();
+    }
+};
 
-            if (buffer == NULL) {
-                return;
-            }
-            for_each(data.begin(), data.end(), [&] (const Vertex &vertex) {
-                memcpy(buffer, vertex.position.data, vertexCoords * sizeof(VT));
-                buffer += vertexCoords * sizeof(VT);
-                memcpy(buffer, vertex.normal.data,   normalCoords * sizeof(NT));
-                buffer += normalCoords * sizeof(NT);
-                memcpy(buffer, vertex.texture.data,  textureCoords * sizeof(TT));
-                buffer += textureCoords * sizeof(TT);
-            });
-            this->unmap();
-        }
+
+template<typename IT, int vertexCount>
+class ElementBuffer : public Buffer {
+public:
+    typedef struct {
+        IT indices[vertexCount];
+    } F;
+
+
+    const i32u faceCount;
+    const i32u stride;
+
+
+    ElementBuffer(i32u faceCount, GLenum usage = GL_STATIC_DRAW) : Buffer(GL_ELEMENT_ARRAY_BUFFER, faceCount * vertexCount * sizeof(IT), NULL, usage), faceCount(faceCount), stride(vertexCount * sizeof(IT)) {
+    }
+
+    ElementBuffer(const ElementBuffer &buffer) : Buffer(buffer), faceCount(buffer.faceCount), stride(buffer.stride) {
+    }
+
+    virtual ~ElementBuffer() {
+    }
+
+
+    virtual void setFace(i32u faceOffset, const F &face) {
+        this->enable();
+        faceOffset *= this->stride;
+        this->setData(faceOffset, this->stride, face.indices);
+        // faceOffset += this->stride;
+        this->disable();
+    }
+    virtual void setFaces(i32u faceOffset, const vector<F> &data) {
+        this->enable();
+        faceOffset *= this->stride;
+        for_each(data.begin(), data.end(), [&] (const F &face) {
+            this->setData(faceOffset, this->stride, face.indices);
+            faceOffset += this->stride;
+        });
         this->disable();
     }
 };

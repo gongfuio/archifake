@@ -23,6 +23,202 @@
 #include "archifake.hpp"
 
 
+static const char * getGLTypeName(GLint type) {
+    switch (type) {
+    case GL_BOOL:
+        return "bool";
+    case GL_BOOL_VEC2:
+        return "bool[2]";
+    case GL_BOOL_VEC3:
+        return "bool[3]";
+    case GL_BOOL_VEC4:
+        return "bool[4]";
+
+    case GL_INT:
+        return "i32";
+    case GL_INT_VEC2:
+        return "i32[2]";
+    case GL_INT_VEC3:
+        return "i32[3]";
+    case GL_INT_VEC4:
+        return "i32[4]";
+
+    case GL_UNSIGNED_INT:
+        return "i32u";
+    case GL_UNSIGNED_INT_VEC2:
+        return "i32u[2]";
+    case GL_UNSIGNED_INT_VEC3:
+        return "i32u[3]";
+    case GL_UNSIGNED_INT_VEC4:
+        return "i32u[4]";
+
+    case GL_UNSIGNED_INT_ATOMIC_COUNTER:
+        return "atomiccounter[i32u]";
+
+    case GL_FLOAT:
+        return "f32";
+    case GL_FLOAT_VEC2:
+        return "f32[2]";
+    case GL_FLOAT_VEC3:
+        return "f32[3]";
+    case GL_FLOAT_VEC4:
+        return "f32[4]";
+    case GL_FLOAT_MAT2:
+        return "f32[2][2]";
+    case GL_FLOAT_MAT2x3:
+        return "f32[2][3]";
+    case GL_FLOAT_MAT2x4:
+        return "f32[2][4]";
+    case GL_FLOAT_MAT3x2:
+        return "f32[3][2]";
+    case GL_FLOAT_MAT3:
+        return "f32[3][3]";
+    case GL_FLOAT_MAT3x4:
+        return "f32[3][4]";
+    case GL_FLOAT_MAT4x2:
+        return "f32[4][2]";
+    case GL_FLOAT_MAT4x3:
+        return "f32[4][3]";
+    case GL_FLOAT_MAT4:
+        return "f32[4][4]";
+
+    case GL_DOUBLE:
+        return "f64";
+    case GL_DOUBLE_VEC2:
+        return "f64[2]";
+    case GL_DOUBLE_VEC3:
+        return "f64[3]";
+    case GL_DOUBLE_VEC4:
+        return "f64[4]";
+    case GL_DOUBLE_MAT2:
+        return "f64[2][2]";
+    case GL_DOUBLE_MAT2x3:
+        return "f64[2][3]";
+    case GL_DOUBLE_MAT2x4:
+        return "f64[2][4]";
+    case GL_DOUBLE_MAT3x2:
+        return "f64[3][2]";
+    case GL_DOUBLE_MAT3:
+        return "f64[3][3]";
+    case GL_DOUBLE_MAT3x4:
+        return "f64[3][4]";
+    case GL_DOUBLE_MAT4x2:
+        return "f64[4][2]";
+    case GL_DOUBLE_MAT4x3:
+        return "f64[4][3]";
+    case GL_DOUBLE_MAT4:
+        return "f64[4][4]";
+
+//  case GL_INT_SAMPLER_1D:
+//  case GL_INT_SAMPLER_1D_ARRAY:
+    case GL_INT_SAMPLER_2D:
+        return "sampler2d[i32]";
+    case GL_INT_SAMPLER_2D_ARRAY:
+        return "sampler2darray[i32]";
+//  case GL_INT_SAMPLER_2D_RECT:
+//  case GL_INT_SAMPLER_2D_MULTISAMPLE:
+//  case GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+    case GL_INT_SAMPLER_3D:
+        return "sampler3d[i32]";
+    case GL_INT_SAMPLER_CUBE:
+        return "samplercube[i32]";
+//  case GL_INT_SAMPLER_CUBE_MAP_ARRAY:
+//  case GL_INT_SAMPLER_BUFFER:
+
+//  case GL_INT_IMAGE_1D:
+//  case GL_INT_IMAGE_1D_ARRAY:
+    case GL_INT_IMAGE_2D:
+        return "image2d[i32]";
+    case GL_INT_IMAGE_2D_ARRAY:
+        return "image2darray[i32]";
+//  case GL_INT_IMAGE_2D_RECT:
+//  case GL_INT_IMAGE_2D_MULTISAMPLE:
+//  case GL_INT_IMAGE_2D_MULTISAMPLE_ARRAY:
+    case GL_INT_IMAGE_3D:
+        return "image3d[i32]";
+    case GL_INT_IMAGE_CUBE:
+        return "imagecube[i32]";
+//  case GL_INT_IMAGE_CUBE_MAP_ARRAY:
+//  case GL_INT_IMAGE_BUFFER:
+
+//  case GL_UNSIGNED_INT_SAMPLER_1D:
+//  case GL_UNSIGNED_INT_SAMPLER_1D_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_2D:
+        return "sampler2d[i32u]";
+    case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+        return "sampler2darray[i32u]";
+//  case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
+//  case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE:
+//  case GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY:
+    case GL_UNSIGNED_INT_SAMPLER_3D:
+        return "sampler3d[i32u]";
+    case GL_UNSIGNED_INT_SAMPLER_CUBE:
+        return "samplercube[i32u]";
+//  case GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY:
+//  case GL_UNSIGNED_INT_SAMPLER_BUFFER:
+
+//  case GL_UNSIGNED_INT_IMAGE_1D:
+//  case GL_UNSIGNED_INT_IMAGE_1D_ARRAY:
+    case GL_UNSIGNED_INT_IMAGE_2D:
+        return "image2d[i32u]";
+    case GL_UNSIGNED_INT_IMAGE_2D_ARRAY:
+        return "image2darray[i32u]";
+//  case GL_UNSIGNED_INT_IMAGE_2D_RECT:
+//  case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE:
+//  case GL_UNSIGNED_INT_IMAGE_2D_MULTISAMPLE_ARRAY:
+    case GL_UNSIGNED_INT_IMAGE_3D:
+        return "image3d[i32u]";
+    case GL_UNSIGNED_INT_IMAGE_CUBE:
+        return "imagecube[i32u]";
+//  case GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY:
+//  case GL_UNSIGNED_INT_IMAGE_BUFFER:
+
+//  case GL_SAMPLER_1D:
+//  case GL_SAMPLER_1D_ARRAY:
+//  case GL_SAMPLER_1D_ARRAY_SHADOW:
+//  case GL_SAMPLER_1D_SHADOW:
+    case GL_SAMPLER_2D:
+        return "sampler2d[f32]";
+    case GL_SAMPLER_2D_ARRAY:
+        return "sampler2darray[f32]";
+    case GL_SAMPLER_2D_ARRAY_SHADOW:
+        return "sampler2darrayshadow[f32]";
+//  case GL_SAMPLER_2D_RECT:
+//  case GL_SAMPLER_2D_RECT_SHADOW:
+    case GL_SAMPLER_2D_SHADOW:
+        return "sampler2dshadow[f32]";
+//  case GL_SAMPLER_2D_MULTISAMPLE:
+//  case GL_SAMPLER_2D_MULTISAMPLE_ARRAY:
+    case GL_SAMPLER_3D:
+        return "sampler3d[f32]";
+    case GL_SAMPLER_CUBE:
+        return "samplercube[f32]";
+//  case GL_SAMPLER_CUBE_MAP_ARRAY:
+//  case GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW:
+    case GL_SAMPLER_CUBE_SHADOW:
+        return "samplercubeshadow[f32]";
+//  case GL_SAMPLER_BUFFER:
+
+//  case GL_IMAGE_1D:
+//  case GL_IMAGE_1D_ARRAY:
+    case GL_IMAGE_2D:
+        return "image2d[f32]";
+    case GL_IMAGE_2D_ARRAY:
+        return "image2darray[f32]";
+//  case GL_IMAGE_2D_RECT:
+//  case GL_IMAGE_2D_MULTISAMPLE:
+//  case GL_IMAGE_2D_MULTISAMPLE_ARRAY:
+    case GL_IMAGE_3D:
+        return "image3d[f32]";
+    case GL_IMAGE_CUBE:
+        return "imagecube[f32]";
+//  case GL_IMAGE_CUBE_MAP_ARRAY:
+//  case GL_IMAGE_BUFFER:
+    }
+    return "unknown";
+}
+
+
 Shader::Shader(i32u type, const string &source) : id(GL_ZERO), compiled(false), type(type), source(source) {
     this->id = glCreateShader(type);
     if (this->id == GL_ZERO) {
@@ -76,29 +272,56 @@ const string & Shader::getLogs() const {
 }
 
 
-ShaderProgram::ShaderProgram(const shared_ptr<Shader> &vertexShader, const shared_ptr<Shader> &fragmentShader) {
-    list<shared_ptr<Shader >> shaders;
+const ShaderProgram::UniformBlock ShaderProgram::emptyUniformBlock = {
+    "",
+    -1,
+    0,
+    0
+};
 
-    shaders.push_back(vertexShader);
-    shaders.push_back(fragmentShader);
-    this->link(shaders);
+const ShaderProgram::Uniform ShaderProgram::emptyUniform = {
+    "",
+    -1,
+    GL_ZERO,
+    0,
+    "",
+    0,
+    0,
+    0,
+    false
+};
+
+const ShaderProgram::Attribute ShaderProgram::emptyAttribute = {
+    "",
+    -1,
+    GL_ZERO,
+    0
+};
+
+
+ShaderProgram::ShaderProgram(const shared_ptr<Shader> &vertexShader, const shared_ptr<Shader> &fragmentShader) : id(GL_ZERO), linked(false), validated(false), enabled(0) {
+    this->shaders.push_back(vertexShader);
+    this->shaders.push_back(fragmentShader);
+    this->link();
 }
 
-ShaderProgram::ShaderProgram(const list<shared_ptr<Shader> > &shaders) {
-    this->link(shaders);
+ShaderProgram::ShaderProgram(const list<shared_ptr<Shader> > &shaders) : id(GL_ZERO), linked(false), validated(false), enabled(0), shaders(shaders) {
+    this->link();
 }
 
 ShaderProgram::~ShaderProgram() {
-    glDeleteProgram(this->id);
+    if (this->id != GL_ZERO) {
+        glDeleteProgram(this->id);
+    }
 }
 
-void ShaderProgram::link(const list<shared_ptr<Shader> > &shaders) {
+void ShaderProgram::link() {
     this->id = glCreateProgram();
     if (this->id == GL_ZERO) {
         return;
     }
 
-    for_each(shaders.begin(), shaders.end(), [&] (const shared_ptr<Shader> &shader) {
+    for_each(this->shaders.begin(), this->shaders.end(), [this] (const shared_ptr<Shader> &shader) {
         if (shader && shader->isCompiled()) {
             glAttachShader(this->id, shader->id);
         }
@@ -217,6 +440,7 @@ void ShaderProgram::link(const list<shared_ptr<Shader> > &shaders) {
             if (blocks[i] >= 0 && blocks[i] < (GLint)blockNames.size()) {
                 blockName = blockNames[i];
             }
+            location = glGetUniformLocation(this->id, name.c_str());
 
             this->uniforms[name] = {
                 name,
@@ -279,6 +503,9 @@ const string & ShaderProgram::getValidatorLogs() const {
 
 void ShaderProgram::enable() {
     if (this->enabled == 0) {
+        if (this->id == GL_ZERO) {
+            return;
+        }
         glUseProgram(this->id);
     }
     this->enabled++;
@@ -291,45 +518,87 @@ void ShaderProgram::disable() {
     }
 }
 
-GLint ShaderProgram::uniformLocation(const string &name) const {
+set<string> ShaderProgram::uniformBlockNames() const {
+    return set<string>(
+        map_key_const_iterator<map<string, UniformBlock> >(this->uniformBlocks.begin()),
+        map_key_const_iterator<map<string, UniformBlock> >(this->uniformBlocks.end())
+    );
+}
+
+set<string> ShaderProgram::uniformNames() const {
+    return set<string>(
+        map_key_const_iterator<map<string, Uniform> >(this->uniforms.begin()),
+        map_key_const_iterator<map<string, Uniform> >(this->uniforms.end())
+    );
+}
+
+set<string> ShaderProgram::attributeNames() const {
+    return set<string>(
+        map_key_const_iterator<map<string, Attribute> >(this->attributes.begin()),
+        map_key_const_iterator<map<string, Attribute> >(this->attributes.end())
+    );
+}
+
+const ShaderProgram::UniformBlock & ShaderProgram::uniformBlock(const string &name) const {
+    auto it = this->uniformBlocks.find(name);
+
+    if (it != this->uniformBlocks.end()) {
+        return (*it).second;
+    }
+    return ShaderProgram::emptyUniformBlock;
+}
+
+const ShaderProgram::Uniform & ShaderProgram::uniform(const string &name) const {
     auto it = this->uniforms.find(name);
 
     if (it != this->uniforms.end()) {
-        return (*it).second.location;
+        return (*it).second;
     }
-    return -1;
+    return ShaderProgram::emptyUniform;
 }
 
-GLint ShaderProgram::attributeLocation(const string &name) const {
+const ShaderProgram::Attribute & ShaderProgram::attribute(const string &name) const {
     auto it = this->attributes.find(name);
 
     if (it != this->attributes.end()) {
-        return (*it).second.location;
+        return (*it).second;
     }
-    return -1;
+    return ShaderProgram::emptyAttribute;
 }
 
-void ShaderProgram::uniform(GLint location, i32 value) {
+GLint ShaderProgram::uniformBlockLocation(const string &name) const {
+    return this->uniformBlock(name).location;
+}
+
+GLint ShaderProgram::uniformLocation(const string &name) const {
+    return this->uniform(name).location;
+}
+
+GLint ShaderProgram::attributeLocation(const string &name) const {
+    return this->attribute(name).location;
+}
+
+void ShaderProgram::uniform(GLint location, i32 value) const {
     glUniform1i(location, value);
 }
 
-void ShaderProgram::uniform(GLint location, const Vector<i32, 2> &vec) {
+void ShaderProgram::uniform(GLint location, const Vector<i32, 2> &vec) const {
     glUniform2i(location, vec[0], vec[1]);
 }
 
-void ShaderProgram::uniform(GLint location, const Vector<i32, 3> &vec) {
+void ShaderProgram::uniform(GLint location, const Vector<i32, 3> &vec) const {
     glUniform3i(location, vec[0], vec[1], vec[2]);
 }
 
-void ShaderProgram::uniform(GLint location, const Vector<i32, 4> &vec) {
+void ShaderProgram::uniform(GLint location, const Vector<i32, 4> &vec) const {
     glUniform4i(location, vec[0], vec[1], vec[2], vec[3]);
 }
 
-void ShaderProgram::uniform(GLint location, const vector<i32> &values) {
+void ShaderProgram::uniform(GLint location, const vector<i32> &values) const {
     glUniform1iv(location, values.size(), values.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 2> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 2> > &values) const {
     vector<i32> buffer(values.size() * 2);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -339,7 +608,7 @@ void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 2> > &value
     glUniform2iv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 3> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 3> > &values) const {
     vector<i32> buffer(values.size() * 3);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -350,7 +619,7 @@ void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 3> > &value
     glUniform3iv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 4> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 4> > &values) const {
     vector<i32> buffer(values.size() * 4);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -362,27 +631,27 @@ void ShaderProgram::uniform(GLint location, const vector<Vector<i32, 4> > &value
     glUniform4iv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, f32 value) {
+void ShaderProgram::uniform(GLint location, f32 value) const {
     glUniform1f(location, value);
 }
 
-void ShaderProgram::uniform(GLint location, const Vector<f32, 2> &vec) {
+void ShaderProgram::uniform(GLint location, const Vector<f32, 2> &vec) const {
     glUniform2f(location, vec[0], vec[1]);
 }
 
-void ShaderProgram::uniform(GLint location, const Vector<f32, 3> &vec) {
+void ShaderProgram::uniform(GLint location, const Vector<f32, 3> &vec) const {
     glUniform3f(location, vec[0], vec[1], vec[2]);
 }
 
-void ShaderProgram::uniform(GLint location, const Vector<f32, 4> &vec) {
+void ShaderProgram::uniform(GLint location, const Vector<f32, 4> &vec) const {
     glUniform4f(location, vec[0], vec[1], vec[2], vec[3]);
 }
 
-void ShaderProgram::uniform(GLint location, const vector<f32> &values) {
+void ShaderProgram::uniform(GLint location, const vector<f32> &values) const {
     glUniform1fv(location, values.size(), values.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 2> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 2> > &values) const {
     vector<f32> buffer(values.size() * 2);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -392,7 +661,7 @@ void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 2> > &value
     glUniform2fv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 3> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 3> > &values) const {
     vector<f32> buffer(values.size() * 3);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -403,7 +672,7 @@ void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 3> > &value
     glUniform3fv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 4> > &values) {
+void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 4> > &values) const {
     vector<f32> buffer(values.size() * 4);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -415,7 +684,7 @@ void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 4> > &value
     glUniform4fv(location, values.size(), buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 2> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 2> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1],
         matrix[1][0], matrix[1][1]
@@ -424,7 +693,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 2> &matrix, boo
     glUniformMatrix2fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 3> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 3> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1], matrix[0][2],
         matrix[1][0], matrix[1][1], matrix[1][2]
@@ -433,7 +702,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 3> &matrix, boo
     glUniformMatrix2x3fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 4> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 4> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
         matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3]
@@ -442,7 +711,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 4> &matrix, boo
     glUniformMatrix2x4fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 2> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 2> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1],
         matrix[1][0], matrix[1][1],
@@ -452,7 +721,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 2> &matrix, boo
     glUniformMatrix3x2fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 3> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 3> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1], matrix[0][2],
         matrix[1][0], matrix[1][1], matrix[1][2],
@@ -462,7 +731,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 3> &matrix, boo
     glUniformMatrix3fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 4> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 4> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
         matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],
@@ -472,7 +741,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 4> &matrix, boo
     glUniformMatrix3x4fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 2> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 2> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1],
         matrix[1][0], matrix[1][1],
@@ -483,7 +752,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 2> &matrix, boo
     glUniformMatrix4x2fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 3> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 3> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1], matrix[0][2],
         matrix[1][0], matrix[1][1], matrix[1][2],
@@ -494,7 +763,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 3> &matrix, boo
     glUniformMatrix4x3fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 4> &matrix, bool transpose) {
+void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 4> &matrix, bool transpose) const {
     f32 buffer[] = {
         matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
         matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],
@@ -505,7 +774,7 @@ void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 4> &matrix, boo
     glUniformMatrix4fv(location, 1, transpose, buffer);
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 2> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 2> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 4);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -517,7 +786,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 2> > &va
     glUniformMatrix2fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 3> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 3> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 6);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -531,7 +800,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 3> > &va
     glUniformMatrix2x3fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 4> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 4> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 8);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -547,7 +816,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 4> > &va
     glUniformMatrix2x4fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 2> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 2> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 6);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -561,7 +830,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 2> > &va
     glUniformMatrix3x2fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 3> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 3> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 9);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -578,7 +847,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 3> > &va
     glUniformMatrix3fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 4> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 4> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 12);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -598,7 +867,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 4> > &va
     glUniformMatrix3x4fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 2> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 2> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 8);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -614,7 +883,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 2> > &va
     glUniformMatrix4x2fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 3> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 3> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 12);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -634,7 +903,7 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 3> > &va
     glUniformMatrix4x3fv(location, values.size(), transpose, buffer.data());
 }
 
-void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 4> > &values, bool transpose) {
+void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 4> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 16);
 
     for (i32u i = 0; i < values.size(); i++) {
@@ -656,4 +925,55 @@ void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 4> > &va
         buffer[i * 16 + 15] = values[i][3][3];
     }
     glUniformMatrix4x3fv(location, values.size(), transpose, buffer.data());
+}
+
+void ShaderProgram::print() const {
+    auto bNames(this->uniformBlockNames());
+    auto uNames(this->uniformNames());
+    auto aNames(this->attributeNames());
+
+    printf("program\n");
+    for_each(this->shaders.begin(), this->shaders.end(), [this] (const shared_ptr<Shader> &shader) {
+        if (shader && shader->getLogs().length() > 0) {
+            printf("logs(shader): %s\n", shader->getLogs().c_str());
+        }
+    });
+    if (this->getLinkerLogs().length() > 0) {
+        printf("logs(linker): %s\n", this->getLinkerLogs().c_str());
+    }
+    if (this->getValidatorLogs().length() > 0) {
+        printf("logs(validator): %s\n", this->getValidatorLogs().c_str());
+    }
+
+    for_each(bNames.begin(), bNames.end(), [this] (const string &name) {
+        auto block(this->uniformBlock(name));
+
+        printf("block[%s]\n", block.name.c_str());
+        printf(" location: %d\n", block.location);
+        printf(" uniforms: %d\n", block.uniforms);
+        printf(" size: %d\n", block.size);
+    });
+    for_each(uNames.begin(), uNames.end(), [this] (const string &name) {
+        auto uniform(this->uniform(name));
+
+        printf("uniform[%s]\n", uniform.name.c_str());
+        printf(" location: %d\n", uniform.location);
+        printf(" type: %s\n", getGLTypeName(uniform.type));
+        printf(" size: %d\n", uniform.size);
+        if (uniform.blockName.length() > 0) {
+            printf(" block: %s\n", uniform.blockName.c_str());
+            printf(" offset: %d\n", uniform.blockOffset);
+            printf(" arrayStride: %d\n", uniform.arrayStride);
+            printf(" matrixStride: %d\n", uniform.matrixStride);
+            printf(" rowMajor: %s\n", uniform.rowMajor ? "true" : "false");
+        }
+    });
+    for_each(aNames.begin(), aNames.end(), [this] (const string &name) {
+        auto attribute(this->attribute(name));
+
+        printf("attribute[%s]\n", attribute.name.c_str());
+        printf(" location: %d\n", attribute.location);
+        printf(" type: %s\n", getGLTypeName(attribute.type));
+        printf(" size: %d\n", attribute.size);
+    });
 }

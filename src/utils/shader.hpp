@@ -81,18 +81,24 @@ public:
 
 
 protected:
+    static const UniformBlock emptyUniformBlock;
+    static const Uniform emptyUniform;
+    static const Attribute emptyAttribute;
+
+
     GLuint id;
     bool linked;
     bool validated;
+    i32u enabled;
+    list<shared_ptr<Shader> > shaders;
     string linkerLogs;
     string validatorLogs;
     map<string, UniformBlock> uniformBlocks;
     map<string, Uniform> uniforms;
     map<string, Attribute> attributes;
-    i32u enabled;
 
 
-    void link(const list<shared_ptr<Shader> > &shaders);
+    void link();
 
 
 public:
@@ -109,46 +115,331 @@ public:
     void enable();
     void disable();
 
+    set<string> uniformBlockNames() const;
+    set<string> uniformNames() const;
+    set<string> attributeNames() const;
+
+    const UniformBlock & uniformBlock(const string &name) const;
+    const Uniform & uniform(const string &name) const;
+    const Attribute & attribute(const string &name) const;
+
+    GLint uniformBlockLocation(const string &name) const;
     GLint uniformLocation(const string &name) const;
     GLint attributeLocation(const string &name) const;
 
-    void uniform(GLint location, i32 value);
-    void uniform(GLint location, const Vector<i32, 2> &vec);
-    void uniform(GLint location, const Vector<i32, 3> &vec);
-    void uniform(GLint location, const Vector<i32, 4> &vec);
-    void uniform(GLint location, const vector<i32> &values);
-    void uniform(GLint location, const vector<Vector<i32, 2> > &values);
-    void uniform(GLint location, const vector<Vector<i32, 3> > &values);
-    void uniform(GLint location, const vector<Vector<i32, 4> > &values);
+    void uniform(GLint location, i32 value) const;
+    void uniform(GLint location, const Vector<i32, 2> &vec) const;
+    void uniform(GLint location, const Vector<i32, 3> &vec) const;
+    void uniform(GLint location, const Vector<i32, 4> &vec) const;
+    void uniform(GLint location, const vector<i32> &values) const;
+    void uniform(GLint location, const vector<Vector<i32, 2> > &values) const;
+    void uniform(GLint location, const vector<Vector<i32, 3> > &values) const;
+    void uniform(GLint location, const vector<Vector<i32, 4> > &values) const;
 
-    void uniform(GLint location, f32 value);
-    void uniform(GLint location, const Vector<f32, 2> &vec);
-    void uniform(GLint location, const Vector<f32, 3> &vec);
-    void uniform(GLint location, const Vector<f32, 4> &vec);
-    void uniform(GLint location, const vector<f32> &values);
-    void uniform(GLint location, const vector<Vector<f32, 2> > &values);
-    void uniform(GLint location, const vector<Vector<f32, 3> > &values);
-    void uniform(GLint location, const vector<Vector<f32, 4> > &values);
+    void uniform(GLint location, f32 value) const;
+    void uniform(GLint location, const Vector<f32, 2> &vec) const;
+    void uniform(GLint location, const Vector<f32, 3> &vec) const;
+    void uniform(GLint location, const Vector<f32, 4> &vec) const;
+    void uniform(GLint location, const vector<f32> &values) const;
+    void uniform(GLint location, const vector<Vector<f32, 2> > &values) const;
+    void uniform(GLint location, const vector<Vector<f32, 3> > &values) const;
+    void uniform(GLint location, const vector<Vector<f32, 4> > &values) const;
 
-    void uniform(GLint location, const Matrix<f32, 2, 2> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 2, 3> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 2, 4> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 3, 2> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 3, 3> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 3, 4> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 4, 2> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 4, 3> &matrix, bool transpose = false);
-    void uniform(GLint location, const Matrix<f32, 4, 4> &matrix, bool transpose = false);
+    void uniform(GLint location, const Matrix<f32, 2, 2> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 2, 3> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 2, 4> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 3, 2> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 3, 3> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 3, 4> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 4, 2> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 4, 3> &matrix, bool transpose = false) const;
+    void uniform(GLint location, const Matrix<f32, 4, 4> &matrix, bool transpose = false) const;
 
-    void uniform(GLint location, const vector<Matrix<f32, 2, 2> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 2, 3> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 2, 4> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 3, 2> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 3, 3> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 3, 4> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 4, 2> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 4, 3> > &values, bool transpose = false);
-    void uniform(GLint location, const vector<Matrix<f32, 4, 4> > &values, bool transpose = false);
+    void uniform(GLint location, const vector<Matrix<f32, 2, 2> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 2, 3> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 2, 4> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 3, 2> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 3, 3> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 3, 4> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 4, 2> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 4, 3> > &values, bool transpose = false) const;
+    void uniform(GLint location, const vector<Matrix<f32, 4, 4> > &values, bool transpose = false) const;
+
+
+    inline void uniform(const string &name, i32 value) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, value);
+        }
+    }
+
+    inline void uniform(const string &name, const Vector<i32, 2> &vec) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, vec);
+        }
+    }
+
+    inline void uniform(const string &name, const Vector<i32, 3> &vec) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, vec);
+        }
+    }
+
+    inline void uniform(const string &name, const Vector<i32, 4> &vec) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, vec);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<i32> &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Vector<i32, 2> > &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Vector<i32, 3> > &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Vector<i32, 4> > &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, f32 value) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, value);
+        }
+    }
+
+    inline void uniform(const string &name, const Vector<f32, 2> &vec) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, vec);
+        }
+    }
+
+    inline void uniform(const string &name, const Vector<f32, 3> &vec) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, vec);
+        }
+    }
+
+    inline void uniform(const string &name, const Vector<f32, 4> &vec) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, vec);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<f32> &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Vector<f32, 2> > &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Vector<f32, 3> > &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Vector<f32, 4> > &values) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 2, 2> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 2, 3> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 2, 4> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 3, 2> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 3, 3> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 3, 4> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 4, 2> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 4, 3> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const Matrix<f32, 4, 4> &matrix, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, matrix, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 2, 2> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 2, 3> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 2, 4> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 3, 2> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 3, 3> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 3, 4> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 4, 2> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 4, 3> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+    inline void uniform(const string &name, const vector<Matrix<f32, 4, 4> > &values, bool transpose = false) const {
+        GLint location = this->uniformLocation(name);
+
+        if (location >= 0) {
+            this->uniform(location, values, transpose);
+        }
+    }
+
+
+    void print() const;
 };
 
 

@@ -336,6 +336,7 @@ bool GLWindow::activate() {
 
 void GLWindow::beginFrame() {
     if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
+        glViewport(0, 0, this->width, this->height);
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClearDepth(0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

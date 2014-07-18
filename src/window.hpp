@@ -51,6 +51,14 @@ public:
     }
 
 
+    inline f32 ratio() const {
+        if (this->height > 0) {
+            return (f32)this->width / (f32)this->height;
+        }
+        return 1.0f;
+    }
+
+
     bool exists();
     bool create();
     void processEvent(XEvent &xev);

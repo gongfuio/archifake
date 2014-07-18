@@ -31,7 +31,7 @@ void SurfaceTask::start() {
 }
 
 void SurfaceTask::animate() {
-    if (started) {
+    if (this->started) {
         f64 t = Clock::elapsed(this->startTick);
         f64 dt = Clock::elapsed(this->lastTick);
 

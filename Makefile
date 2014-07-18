@@ -15,7 +15,7 @@ RELEASEFLAGS := -g -O0
 CPPFLAGS += -pipe $(foreach dir, $(INCLUDES), -I$(dir))
 CFLAGS += -std=gnu99 -Wall -mmmx -msse -msse2 -msse3 $(RELEASEFLAGS)
 CXXFLAGS += -std=gnu++11 -Wall -mmmx -msse -msse2 -msse3 $(RELEASEFLAGS)
-LDFLAGS += -pipe -L/usr/lib/mesa
+LDFLAGS += -pipe #-L/usr/lib/mesa
 LIBRARIES := -lstdc++ -lm -lGL -lfontconfig -lXft -lX11 -ljpeg -lpng -lpthread -lrt -lm -lstdc++ -lGL -lGLU -lGLEW
 
 # System detection
