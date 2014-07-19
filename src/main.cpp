@@ -28,8 +28,6 @@ static const f64 frameTime = 1.0 / 60.0;
 
 void run(Display *display, Screen *screen) {
     GLWindow window(display, screen);
-    i64u lastDraw;
-    Scene scene;
 
     // create window
     if (!window.create()) {
@@ -43,46 +41,31 @@ void run(Display *display, Screen *screen) {
     glewInit();
 
     // setup demo scene
-    const char *vertexShaderSource =
-        R"(#version 130
-
-        uniform mat4 pvmMatrix;
-        in vec2 inPosition;
-
-        void main(void) {
-            gl_Position = pvmMatrix * vec4(inPosition, 0.0, 1.0);
-        }
-        )";
-    const char *fragmentShaderSource =
-        R"(#version 130
-
-        out vec4 outColor;
-
-        void main(void) {
-            outColor = vec4(1.0, 1.0, 1.0, 1.0);
-        }
-        )";
     shared_ptr<ShaderProgram> program(
         new ShaderProgram(
-            shared_ptr<Shader>(new Shader(GL_VERTEX_SHADER, vertexShaderSource)),
-            shared_ptr<Shader>(new Shader(GL_FRAGMENT_SHADER, fragmentShaderSource))
+            Shader::fromFile(GL_VERTEX_SHADER, "test.vs"),
+            Shader::fromFile(GL_FRAGMENT_SHADER, "test.fs")
         )
     );
     shared_ptr<Surface> surface0(new FlatSurface(program));
+    Scene scene;
 
-    program->print();
+    // program->print();
 
     scene.addSurface("surface0", surface0);
+    scene.startAll();
+    scene.showAll();
 
     // setup demo renderer
     shared_ptr<Renderer> renderer(new Renderer());
 
-    renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 1.0, 1000.0);
-    // renderer->camera.viewMatrix = LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 1.0, M_PI / 2, 0.0);
+    renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0);
+    renderer->camera.viewMatrix = LookAtTransform<f32>(Vector3<f32>(0, 0.25, 1), Vector3<f32>(0, 0, 0), Vector3<f32>(0, 1, 0));
 
     // event loop
-    scene.startAll();
-    scene.showAll();
+    i64u firstDraw, lastDraw;
+
+    firstDraw = Clock::tick();
     lastDraw = Clock::tick();
     while (window.exists()) {
         bool draw = Clock::elapsed(lastDraw) >= frameTime;
@@ -92,7 +75,11 @@ void run(Display *display, Screen *screen) {
             lastDraw = Clock::tick();
             window.beginFrame();
             scene.animate();
+
+            renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0);
+            // renderer->camera.viewMatrix = LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 10.0, Clock::elapsed(firstDraw) * M_PI * 2, 0);
             // renderer.animate();
+
             scene.render(renderer);
         }
         while (XPending(display)) {

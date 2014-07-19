@@ -493,6 +493,13 @@ public:
     }
 
 
+    void copy(T *data) const {
+        for (int i = n - 1; i >= 0; i--) {
+            data[i] = this->data[i];
+        }
+    }
+
+
     bool isNull() const {
         for (int i = n - 1; i >= 0; i--) {
             if (_ne0(this->data[i])) {
@@ -864,6 +871,23 @@ public:
         }
         return dst;
     };
+
+
+    void copy(T *data) const {
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                data[i * n + j] = this->data[i][j];
+            }
+        }
+    }
+
+    void copyTransposed(T *data) const {
+        for (int i = m - 1; i >= 0; i--) {
+            for (int j = n - 1; j >= 0; j--) {
+                data[j * m + i] = this->data[i][j];
+            }
+        }
+    }
 
 
     bool isNull() const {

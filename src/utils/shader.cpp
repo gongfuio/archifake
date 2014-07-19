@@ -219,7 +219,7 @@ static const char * getGLTypeName(GLint type) {
 }
 
 
-Shader::Shader(i32u type, const string &source) : id(GL_ZERO), compiled(false), type(type), source(source) {
+Shader::Shader(GLenum type, const string &source) : id(GL_ZERO), compiled(false), type(type), source(source) {
     this->id = glCreateShader(type);
     if (this->id == GL_ZERO) {
         return;
@@ -269,6 +269,17 @@ bool Shader::isCompiled() const {
 
 const string & Shader::getLogs() const {
     return this->logs;
+}
+
+
+shared_ptr<Shader> Shader::fromFile(GLenum type, const string &path) {
+    stringstream source;
+    ifstream file(path);
+
+    while (!file.eof()) {
+        source.put(file.get());
+    }
+    return shared_ptr<Shader>(new Shader(type, source.str()));
 }
 
 
@@ -653,276 +664,195 @@ void ShaderProgram::uniform(GLint location, const vector<f32> &values) const {
 
 void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 2> > &values) const {
     vector<f32> buffer(values.size() * 2);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 2 + 0] = values[i][0];
-        buffer[i * 2 + 1] = values[i][1];
+        values[i].copy(ptr);
+        ptr += 2;
     }
     glUniform2fv(location, values.size(), buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 3> > &values) const {
     vector<f32> buffer(values.size() * 3);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 3 + 0] = values[i][0];
-        buffer[i * 3 + 1] = values[i][1];
-        buffer[i * 3 + 2] = values[i][2];
+        values[i].copy(ptr);
+        ptr += 3;
     }
     glUniform3fv(location, values.size(), buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Vector<f32, 4> > &values) const {
     vector<f32> buffer(values.size() * 4);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 4 + 0] = values[i][0];
-        buffer[i * 4 + 1] = values[i][1];
-        buffer[i * 4 + 2] = values[i][2];
-        buffer[i * 4 + 3] = values[i][3];
+        values[i].copy(ptr);
+        ptr += 4;
     }
     glUniform4fv(location, values.size(), buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 2> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1],
-        matrix[1][0], matrix[1][1]
-    };
+    f32 buffer[4];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix2fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 3> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1], matrix[0][2],
-        matrix[1][0], matrix[1][1], matrix[1][2]
-    };
+    f32 buffer[6];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix2x3fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 2, 4> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
-        matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3]
-    };
+    f32 buffer[8];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix2x4fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 2> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1],
-        matrix[1][0], matrix[1][1],
-        matrix[2][0], matrix[2][1]
-    };
+    f32 buffer[6];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix3x2fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 3> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1], matrix[0][2],
-        matrix[1][0], matrix[1][1], matrix[1][2],
-        matrix[2][0], matrix[2][1], matrix[2][2]
-    };
+    f32 buffer[9];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix3fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 3, 4> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
-        matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],
-        matrix[2][0], matrix[2][1], matrix[2][2], matrix[2][3]
-    };
+    f32 buffer[12];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix3x4fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 2> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1],
-        matrix[1][0], matrix[1][1],
-        matrix[2][0], matrix[2][1],
-        matrix[3][0], matrix[3][1]
-    };
+    f32 buffer[8];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix4x2fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 3> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1], matrix[0][2],
-        matrix[1][0], matrix[1][1], matrix[1][2],
-        matrix[2][0], matrix[2][1], matrix[2][2],
-        matrix[3][0], matrix[3][1], matrix[3][2]
-    };
+    f32 buffer[12];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix4x3fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const Matrix<f32, 4, 4> &matrix, bool transpose) const {
-    f32 buffer[] = {
-        matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
-        matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],
-        matrix[2][0], matrix[2][1], matrix[2][2], matrix[2][3],
-        matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3],
-    };
+    f32 buffer[16];
 
+    matrix.copyTransposed(buffer);
     glUniformMatrix4fv(location, 1, transpose, buffer);
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 2> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 4);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 4 + 0] = values[i][0][0];
-        buffer[i * 4 + 1] = values[i][0][1];
-        buffer[i * 4 + 2] = values[i][1][0];
-        buffer[i * 4 + 3] = values[i][1][1];
+        values[i].copyTransposed(ptr);
+        ptr += 4;
     }
     glUniformMatrix2fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 3> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 6);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 6 + 0] = values[i][0][0];
-        buffer[i * 6 + 1] = values[i][0][1];
-        buffer[i * 6 + 2] = values[i][0][2];
-        buffer[i * 6 + 3] = values[i][1][0];
-        buffer[i * 6 + 4] = values[i][1][1];
-        buffer[i * 6 + 5] = values[i][1][2];
+        values[i].copyTransposed(ptr);
+        ptr += 6;
     }
     glUniformMatrix2x3fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 2, 4> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 8);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 8 + 0] = values[i][0][0];
-        buffer[i * 8 + 1] = values[i][0][1];
-        buffer[i * 8 + 2] = values[i][0][2];
-        buffer[i * 8 + 3] = values[i][0][3];
-        buffer[i * 8 + 4] = values[i][1][0];
-        buffer[i * 8 + 5] = values[i][1][1];
-        buffer[i * 8 + 6] = values[i][1][2];
-        buffer[i * 8 + 7] = values[i][1][3];
+        values[i].copyTransposed(ptr);
+        ptr += 8;
     }
     glUniformMatrix2x4fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 2> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 6);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 6 + 0] = values[i][0][0];
-        buffer[i * 6 + 1] = values[i][0][1];
-        buffer[i * 6 + 2] = values[i][1][0];
-        buffer[i * 6 + 3] = values[i][1][1];
-        buffer[i * 6 + 4] = values[i][2][0];
-        buffer[i * 6 + 5] = values[i][2][1];
+        values[i].copyTransposed(ptr);
+        ptr += 6;
     }
     glUniformMatrix3x2fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 3> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 9);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 9 + 0] = values[i][0][0];
-        buffer[i * 9 + 1] = values[i][0][1];
-        buffer[i * 9 + 2] = values[i][0][2];
-        buffer[i * 9 + 3] = values[i][1][0];
-        buffer[i * 9 + 4] = values[i][1][1];
-        buffer[i * 9 + 5] = values[i][1][2];
-        buffer[i * 9 + 6] = values[i][2][0];
-        buffer[i * 9 + 7] = values[i][2][1];
-        buffer[i * 9 + 8] = values[i][2][2];
+        values[i].copyTransposed(ptr);
+        ptr += 9;
     }
     glUniformMatrix3fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 3, 4> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 12);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 12 + 0] = values[i][0][0];
-        buffer[i * 12 + 1] = values[i][0][1];
-        buffer[i * 12 + 2] = values[i][0][2];
-        buffer[i * 12 + 3] = values[i][0][3];
-        buffer[i * 12 + 4] = values[i][1][0];
-        buffer[i * 12 + 5] = values[i][1][1];
-        buffer[i * 12 + 6] = values[i][1][2];
-        buffer[i * 12 + 7] = values[i][1][3];
-        buffer[i * 12 + 8] = values[i][2][0];
-        buffer[i * 12 + 9] = values[i][2][1];
-        buffer[i * 12 + 10] = values[i][2][2];
-        buffer[i * 12 + 11] = values[i][2][3];
+        values[i].copyTransposed(ptr);
+        ptr += 12;
     }
     glUniformMatrix3x4fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 2> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 8);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 8 + 0] = values[i][0][0];
-        buffer[i * 8 + 1] = values[i][0][1];
-        buffer[i * 8 + 2] = values[i][1][0];
-        buffer[i * 8 + 3] = values[i][1][1];
-        buffer[i * 8 + 4] = values[i][2][0];
-        buffer[i * 8 + 5] = values[i][2][1];
-        buffer[i * 8 + 6] = values[i][3][0];
-        buffer[i * 8 + 7] = values[i][3][1];
+        values[i].copyTransposed(ptr);
+        ptr += 8;
     }
     glUniformMatrix4x2fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 3> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 12);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 12 + 0] = values[i][0][0];
-        buffer[i * 12 + 1] = values[i][0][1];
-        buffer[i * 12 + 2] = values[i][0][2];
-        buffer[i * 12 + 3] = values[i][1][0];
-        buffer[i * 12 + 4] = values[i][1][1];
-        buffer[i * 12 + 5] = values[i][1][2];
-        buffer[i * 12 + 6] = values[i][2][0];
-        buffer[i * 12 + 7] = values[i][2][1];
-        buffer[i * 12 + 8] = values[i][2][2];
-        buffer[i * 12 + 9] = values[i][3][0];
-        buffer[i * 12 + 10] = values[i][3][1];
-        buffer[i * 12 + 11] = values[i][3][2];
+        values[i].copyTransposed(ptr);
+        ptr += 12;
     }
     glUniformMatrix4x3fv(location, values.size(), transpose, buffer.data());
 }
 
 void ShaderProgram::uniform(GLint location, const vector<Matrix<f32, 4, 4> > &values, bool transpose) const {
     vector<f32> buffer(values.size() * 16);
+    f32 *ptr = buffer.data();
 
     for (i32u i = 0; i < values.size(); i++) {
-        buffer[i * 16 + 0] = values[i][0][0];
-        buffer[i * 16 + 1] = values[i][0][1];
-        buffer[i * 16 + 2] = values[i][0][2];
-        buffer[i * 16 + 3] = values[i][0][3];
-        buffer[i * 16 + 4] = values[i][1][0];
-        buffer[i * 16 + 5] = values[i][1][1];
-        buffer[i * 16 + 6] = values[i][1][2];
-        buffer[i * 16 + 7] = values[i][1][3];
-        buffer[i * 16 + 8] = values[i][2][0];
-        buffer[i * 16 + 9] = values[i][2][1];
-        buffer[i * 16 + 10] = values[i][2][2];
-        buffer[i * 16 + 11] = values[i][2][3];
-        buffer[i * 16 + 12] = values[i][3][0];
-        buffer[i * 16 + 13] = values[i][3][1];
-        buffer[i * 16 + 14] = values[i][3][2];
-        buffer[i * 16 + 15] = values[i][3][3];
+        values[i].copyTransposed(ptr);
+        ptr += 16;
     }
     glUniformMatrix4x3fv(location, values.size(), transpose, buffer.data());
 }

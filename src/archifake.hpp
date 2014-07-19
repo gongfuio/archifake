@@ -50,11 +50,13 @@
 #include <GL/gl.h>
 
 #include <algorithm>
+#include <fstream>
 #include <list>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
+#include <sstream>
 #include <vector>
 
 using namespace std;

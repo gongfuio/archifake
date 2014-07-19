@@ -43,8 +43,8 @@ void Surface::animate(f64 t, f64 dt) {
 void Surface::render(const shared_ptr<Renderer> &renderer) {
     const Matrix<f32, 4, 4> & pMatrix = renderer->camera.projectionMatrix;
     const Matrix<f32, 4, 4> & vMatrix = renderer->camera.viewMatrix;
-    const Matrix<f32, 4, 4> pvMatrix(vMatrix * pMatrix);
-    const Matrix<f32, 4, 4> pvmMatrix(this->modelMatrix * pvMatrix);
+    const Matrix<f32, 4, 4> pvMatrix(pMatrix * vMatrix);
+    const Matrix<f32, 4, 4> pvmMatrix(pvMatrix * this->modelMatrix);
 
     this->program->enable();
 
@@ -135,5 +135,5 @@ void FlatSurface::renderImpl(const shared_ptr<Renderer> &renderer) {
 }
 
 void FlatSurface::animate(f64 t, f64 dt) {
-    // this->modelMatrix = RotateYTransform<f32>(t * M_PI);
+    this->modelMatrix = TranslateTransform<f32>(0, 0, -t) * RotateYTransform<f32>(t * M_PI);
 }

@@ -37,10 +37,10 @@ inline Matrix<T, 4, 4> IdentityTransform() {
 template<typename T>
 inline Matrix<T, 4, 4> TranslateTransform(const T &x, const T &y, const T &z) {
     return Matrix4x4<T>(
-        T(1), T(0), T(0), T(0),
-        T(0), T(1), T(0), T(0),
-        T(0), T(0), T(1), T(0),
-           x,    y,    z, T(1)
+        T(1), T(0), T(0),    x,
+        T(0), T(1), T(0),    y,
+        T(0), T(0), T(1),    z,
+        T(0), T(0), T(0), T(1)
     );
 }
 
@@ -74,9 +74,9 @@ inline Matrix<T, 4, 4> RotateTransform(const T &angle, const T &x, const T &y, c
     const T c(_cos(angle));
 
     return Matrix4x4<T>(
-             nx * nx * (T(1) - c) + c,  nx * ny * (T(1) - c) + nz * s,  nx * nz * (T(1) - c) - ny * s,  T(0),
-        nx * ny * (T(1) - c) - nz * s,       ny * ny * (T(1) - c) + c,  ny * nz * (T(1) - c) + nx * s,  T(0),
-        nx * nz * (T(1) - c) + ny * s,  ny * nz * (T(1) - c) - nx * s,       nz * nz * (T(1) - c) + c,  T(0),
+        nx * nx * (T(1) - c) +      c,  nx * ny * (T(1) - c) - nz * s,  nx * nz * (T(1) - c) + ny * s,  T(0),
+        nx * ny * (T(1) - c) + nz * s,  ny * ny * (T(1) - c) +      c,  ny * nz * (T(1) - c) - nx * s,  T(0),
+        nx * nz * (T(1) - c) - ny * s,  ny * nz * (T(1) - c) + nx * s,  nz * nz * (T(1) - c) +      c,  T(0),
                                  T(0),                           T(0),                           T(0),  T(1)
     );
 }
@@ -136,10 +136,10 @@ inline Matrix<T, 4, 4> LookAroundYTransform(const Vector<T, 3> &center, const T 
 template<typename T>
 inline Matrix<T, 4, 4> OrthographicProjection(T left, T right, T bottom, T top, T znear, T zfar) {
     return Matrix4x4<T>(
-                   T(2) / (right - left),                              T(0),                              T(0),  T(0),
-                                    T(0),             T(2) / (top - bottom),                              T(0),  T(0),
-                                    T(0),                              T(0),            -T(2) / (zfar - znear),  T(0),
-        -(right + left) / (right - left),  -(top + bottom) / (top - bottom),  -(zfar + znear) / (zfar - znear),  T(1)
+                  T(2) / (right - left),                           T(0),                              T(0),       -(right + left) / (right - left),
+                                   T(0),          T(2) / (top - bottom),                              T(0),       -(top + bottom) / (top - bottom),
+                                   T(0),                           T(0),            -T(2) / (zfar - znear),       -(zfar + znear) / (zfar - znear),
+                                   T(0),                           T(0),                              T(0),                                   T(1)
     );
 }
 
@@ -153,10 +153,10 @@ inline Matrix<T, 4, 4> PerspectiveProjection(T fovy, T aspect, T znear, T zfar) 
     const T f(T(1) / _tan(fovy));
 
     return Matrix4x4<T>(
-        f / aspect,  T(0),                                  T(0),   T(0),
-              T(0),     f,                                  T(0),   T(0),
-              T(0),  T(0),       (zfar + znear) / (znear - zfar),  -T(1),
-              T(0),  T(0),  T(2) * zfar * znear / (znear - zfar),   T(0)
+                             f / aspect,                           T(0),                              T(0),                                   T(0),
+                                   T(0),                              f,                              T(0),                                   T(0),
+                                   T(0),                           T(0),  -(zfar + znear) / (znear - zfar),  -T(2) * zfar * znear / (znear - zfar),
+                                   T(0),                           T(0),                             -T(1),                                   T(0)
     );
 }
 
@@ -165,30 +165,30 @@ inline Matrix<T, 4, 4> InfinitePerspectiveProjection(T fovy, T aspect, T znear) 
     const T f(T(1) / _tan(fovy));
 
     return Matrix4x4<T>(
-        f / aspect,  T(0),                        T(0),   T(0),
-              T(0),     f,                        T(0),   T(0),
-              T(0),  T(0),          (_eps<T>() - T(1)),  -T(1),
-              T(0),  T(0),  (_eps<T>() - T(2)) * znear,   T(0)
+                             f / aspect,                           T(0),                              T(0),                                   T(0),
+                                   T(0),                              f,                              T(0),                                   T(0),
+                                   T(0),                           T(0),                             -T(1),                          -T(2) * znear,
+                                   T(0),                           T(0),                             -T(1),                                   T(0)
     );
 }
 
 template<typename T>
 inline Matrix<T, 4, 4> FrustumProjection(T left, T right, T bottom, T top, T znear, T zfar) {
     return Matrix4x4<T>(
-          T(2) * znear / (right - left),                             T(0),                                   T(0),   T(0),
-                                   T(0),    T(2) * znear / (top - bottom),                                   T(0),   T(0),
-        (right + left) / (right - left),  (top + bottom) / (top - bottom),       -(zfar + znear) / (zfar - znear),  -T(1),
-                                   T(0),                             T(0),  -T(2) * zfar * znear / (zfar - znear),   T(0)
+          T(2) * znear / (right - left),                           T(0),   (right + left) / (right - left),                                   T(0),
+                                   T(0),  T(2) * znear / (top - bottom),   (top + bottom) / (top - bottom),                                   T(0),
+                                   T(0),                           T(0),  -(zfar + znear) / (zfar - znear),  -T(2) * zfar * znear / (zfar - znear),
+                                   T(0),                           T(0),                             -T(1),                                   T(0)
     );
 }
 
 template<typename T>
 inline Matrix<T, 4, 4> InfiniteFrustumProjection(T left, T right, T bottom, T top, T znear) {
     return Matrix4x4<T>(
-          T(2) * znear / (right - left),                             T(0),                        T(0),   T(0),
-                                   T(0),    T(2) * znear / (top - bottom),                        T(0),   T(0),
-        (right + left) / (right - left),  (top + bottom) / (top - bottom),          (_eps<T>() - T(1)),  -T(1),
-                                   T(0),                             T(0),  (_eps<T>() - T(2)) * znear,   T(0)
+          T(2) * znear / (right - left),                           T(0),   (right + left) / (right - left),                                   T(0),
+                                   T(0),  T(2) * znear / (top - bottom),   (top + bottom) / (top - bottom),                                   T(0),
+                                   T(0),                           T(0),                             -T(1),                          -T(2) * znear,
+                                   T(0),                           T(0),                             -T(1),                                   T(0)
     );
 }
 

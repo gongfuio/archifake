@@ -37,16 +37,19 @@ protected:
 
 
 public:
-    const i32u type;
+    const GLenum type;
     const string source;
 
 
-    Shader(i32u type, const string &source);
+    Shader(GLenum type, const string &source);
     ~Shader();
 
 
     bool isCompiled() const;
     const string & getLogs() const;
+
+
+    static shared_ptr<Shader> fromFile(GLenum type, const string &path);
 };
 
 
