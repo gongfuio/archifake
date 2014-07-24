@@ -37,13 +37,13 @@ protected:
     Atom wm_delete_window;
     bool visible;
     i32 x, y;
-    i32u width, height;
+    i32u _width, _height;
     bool mouse;
     i32 mouseX, mouseY;
 
 
 public:
-    GLWindow(Display *display, Screen *screen) : display(display), screen(screen), glxConfigs(NULL), glxContext(NULL), visualinfo(NULL), colormap(None), window(None), glxWindow(None), wm_delete_window(None), visible(false), x(0), y(0), width(0), height(0), mouse(false), mouseX(0), mouseY(0) {
+    GLWindow(Display *display, Screen *screen) : display(display), screen(screen), glxConfigs(NULL), glxContext(NULL), visualinfo(NULL), colormap(None), window(None), glxWindow(None), wm_delete_window(None), visible(false), x(0), y(0), _width(0), _height(0), mouse(false), mouseX(0), mouseY(0) {
     }
 
     ~GLWindow() {
@@ -51,9 +51,17 @@ public:
     }
 
 
+    inline i32 width() const {
+        return this->_width;
+    }
+
+    inline i32 height() const {
+        return this->_height;
+    }
+
     inline f32 ratio() const {
-        if (this->height > 0) {
-            return (f32)this->width / (f32)this->height;
+        if (this->_height > 0) {
+            return (f32)this->_width / (f32)this->_height;
         }
         return 1.0f;
     }
@@ -65,7 +73,7 @@ public:
     void destroy();
 
     bool activate();
-    void beginFrame();
+    void beginFrame(const Camera &camera);
     void endFrame();
     void deactivate();
 };

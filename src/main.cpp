@@ -72,13 +72,14 @@ void run(Display *display, Screen *screen) {
         bool active = false;
 
         if (draw) {
-            lastDraw = Clock::tick();
-            window.beginFrame();
-            scene.animate();
-
+            renderer->camera.viewport = Rectangle2<i32>(0, 0, window.width(), window.height());
             renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0);
             // renderer->camera.viewMatrix = LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 10.0, Clock::elapsed(firstDraw) * M_PI * 2, 0);
             // renderer.animate();
+
+            lastDraw = Clock::tick();
+            window.beginFrame(renderer->camera);
+            scene.animate();
 
             scene.render(renderer);
         }

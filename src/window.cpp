@@ -116,16 +116,16 @@ bool GLWindow::create() {
         ButtonReleaseMask | KeyPressMask | KeyReleaseMask;
     attrs.cursor = None;
 
-    this->width = XDisplayWidth(this->display, XScreenNumberOfScreen(this->screen));
-    this->height = XDisplayHeight(this->display, XScreenNumberOfScreen(this->screen));
+    this->_width = XDisplayWidth(this->display, XScreenNumberOfScreen(this->screen));
+    this->_height = XDisplayHeight(this->display, XScreenNumberOfScreen(this->screen));
 
     this->window = XCreateWindow(
         this->display,
         XRootWindowOfScreen(this->screen),
         0,
         0,
-        this->width,
-        this->height,
+        this->_width,
+        this->_height,
         0, // border width
         this->visualinfo->depth,
         InputOutput,
@@ -197,8 +197,8 @@ void GLWindow::processEvent(XEvent &xev) {
     case ConfigureNotify:
         this->x = xev.xconfigure.x;
         this->y = xev.xconfigure.y;
-        this->width = xev.xconfigure.width;
-        this->height = xev.xconfigure.height;
+        this->_width = xev.xconfigure.width;
+        this->_height = xev.xconfigure.height;
         break;
     case UnmapNotify:
         this->visible = false;
@@ -322,7 +322,7 @@ void GLWindow::destroy() {
 
     this->visible = false;
     this->x = this->y = 0;
-    this->width = this->height = 0;
+    this->_width = this->_height = 0;
     this->mouse = false;
     this->mouseX = this->mouseY = 0;
 }
@@ -334,9 +334,14 @@ bool GLWindow::activate() {
     return true;
 }
 
-void GLWindow::beginFrame() {
+void GLWindow::beginFrame(const Camera &camera) {
     if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
-        glViewport(0, 0, this->width, this->height);
+        glViewport(
+            camera.viewport.tl[0],
+            camera.viewport.tl[1],
+            camera.viewport.width(),
+            camera.viewport.height()
+        );
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClearDepth(0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

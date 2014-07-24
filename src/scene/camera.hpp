@@ -34,6 +34,11 @@ public:
 
     Camera() : projectionMatrix(IdentityTransform<f32>()), viewMatrix(IdentityTransform<f32>()) {
     }
+
+
+    Vector<f32, 3> unprojectPoint(const Vector<i32, 3> &window) const;
+
+    Line<f32, 3> unprojectLine(const Vector<i32, 2> &window) const;
 };
 
 

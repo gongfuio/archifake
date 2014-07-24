@@ -511,12 +511,13 @@ public:
 
 
     void print(const char *name) const {
-        printf("%s[%d]=\n", name, n);
+        printf("%s\n", name);
         this->print();
         printf("\n");
     }
 
     void print() const {
+        printf("Vector<%d>\n", n);
         for (int i = 0; i < n; i++) {
             if (i > 0) {
                 printf(" ");
@@ -930,12 +931,13 @@ public:
 
 
     void print(const char *name) const {
-        printf("%s[%dx%d]=\n", name, m, n);
+        printf("%s\n", name);
         this->print();
         printf("\n");
     }
 
     void print() const {
+        printf("Matrix[%dx%d]\n", m, n);
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 if (j > 0) {
@@ -1218,6 +1220,11 @@ public:
     }
 
 
+    // Range<T> & operator =(const Range<T> &range) {
+    //     return *this;
+    // }
+
+
     int operator ==(const Range<T> &range) const {
         return (_eq(this->minimum, range.minimum) && _eq(this->maximum, range.maximum));
     }
@@ -1234,18 +1241,28 @@ public:
     inline bool isOutside(const T &value) const {
         return !this->isInside(value);
     }
+
+
+    void print(const char *name) const {
+        printf("%s\n", name);
+        this->print();
+        printf("\n");
+    }
+
+    void print() const {
+        printf("Range: %.05f %.05f\n", (double)this->minimum, (double)this->maximum);
+    }
 };
 
 
 template<typename T>
 class Rectangle2 {
 public:
-    typedef Vector<T, 2> V2;
+    typedef Vector<T, 2> V;
 
 
-public:
-    const V2 tl;
-    const V2 br;
+    const V tl;
+    const V br;
 
 
     inline Rectangle2() {
@@ -1254,7 +1271,7 @@ public:
     inline Rectangle2(const T &x1, const T &y1, const T &x2, const T &y2) : tl(Vector2(_min(x1, x2), _min(y1, y2))), br(Vector2(_max(x1, x2), _max(y1, y2))) {
     }
 
-    inline Rectangle2(const V2 &tl, const V2 &br) : tl(Vector2(_min(tl[0], br[0]), _min(tl[1], br[1]))), br(Vector2(_max(tl[0], br[0]), _max(tl[1], br[1]))) {
+    inline Rectangle2(const V &tl, const V &br) : tl(Vector2(_min(tl[0], br[0]), _min(tl[1], br[1]))), br(Vector2(_max(tl[0], br[0]), _max(tl[1], br[1]))) {
     }
 
     inline Rectangle2(const Rectangle2<T> &rect) : tl(rect.tl), br(rect.br) {
@@ -1279,12 +1296,57 @@ public:
     }
 
 
-    inline bool isInside(const V2 &p) const {
+    inline bool isInside(const V &p) const {
         return (this->tl[0] <= p[0] && p[0] <= this->br[0] && this->tl[1] <= p[1] && p[1] <= this->br[1]);
     }
 
-    inline bool isOutside(const V2 &p) const {
+    inline bool isOutside(const V &p) const {
         return !this->isInside(p);
+    }
+
+
+    void print(const char *name) const {
+        printf("%s\n", name);
+        this->print();
+        printf("\n");
+    }
+
+    void print() const {
+        printf("Rectangle2: %.05f %.05f, %.05f %.05f\n", (double)this->tl[0], (double)this->tl[1], (double)this->width(), (double)this->height());
+    }
+};
+
+
+template<typename T, int n>
+class Line {
+public:
+    typedef Vector<T, n> V;
+
+
+    const V point;
+    const V direction;
+
+
+    inline Line() {
+    }
+
+    inline Line(const V &point, const V &direction) : point(point), direction(direction) {
+    }
+
+    inline Line(const Line<T, n> &line) : point(line.point), direction(line.direction) {
+    }
+
+
+    void print(const char *name) const {
+        printf("%s\n", name);
+        this->print();
+        printf("\n");
+    }
+
+    void print() const {
+        printf("Line[%d]\n", n);
+        this->point.print();
+        this->direction.print();
     }
 };
 
