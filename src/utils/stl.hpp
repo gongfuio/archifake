@@ -24,6 +24,52 @@
 #define __STL_H_INCLUDE__
 
 
+template<class T>
+class LazyInitialized {
+private:
+    function<void(T&)> initializer;
+    bool initialized;
+    T value;
+
+
+    LazyInitialized() {
+    }
+
+
+public:
+    inline LazyInitialized(const function<void(T&)> &initializer) : initializer(initializer), initialized(false) {
+    }
+
+    inline LazyInitialized(const LazyInitialized<T> &ref) : initializer(ref.initializer), initialized(ref.initialized), value(ref.value) {
+    }
+
+
+    LazyInitialized<T> & operator =(const LazyInitialized<T> &ref) {
+        this->initializer = ref.initializer;
+        this->initialized = ref.initialized;
+        this->value = ref.value;
+        return *this;
+    }
+
+
+    inline T &operator *() {
+        if (!this->initialized) {
+            this->initializer(this->value);
+            this->initialized = true;
+        }
+        return this->value;
+    }
+
+    inline const T &operator *() const {
+        if (!this->initialized) {
+            this->initializer(this->value);
+            this->initialized = true;
+        }
+        return this->value;
+    }
+};
+
+
 template<class M>
 class map_key_iterator : public M::iterator {
 public:

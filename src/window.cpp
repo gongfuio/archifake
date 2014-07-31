@@ -336,11 +336,13 @@ bool GLWindow::activate() {
 
 void GLWindow::beginFrame(const Camera &camera) {
     if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
+        auto &viewport = camera.viewport();
+
         glViewport(
-            camera.viewport.tl[0],
-            camera.viewport.tl[1],
-            camera.viewport.width(),
-            camera.viewport.height()
+            viewport.x(),
+            viewport.y(),
+            viewport.width(),
+            viewport.height()
         );
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClearDepth(0.0);

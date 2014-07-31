@@ -59,8 +59,12 @@ void run(Display *display, Screen *screen) {
     // setup demo renderer
     shared_ptr<Renderer> renderer(new Renderer());
 
-    renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0);
-    renderer->camera.viewMatrix = LookAtTransform<f32>(Vector3<f32>(0, 0.25, 1), Vector3<f32>(0, 0, 0), Vector3<f32>(0, 1, 0));
+    renderer->camera = Camera(
+        Rectangle2<i32>(0, 0, window.width(), window.height()),
+        Range<f64>(0.0, 1.0),
+        PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0),
+        LookAtTransform<f32>(Vector3<f32>(0, 0.25, 1), Vector3<f32>(0, 0, 0), Vector3<f32>(0, 1, 0))
+    );
 
     // event loop
     i64u firstDraw, lastDraw;
@@ -72,8 +76,10 @@ void run(Display *display, Screen *screen) {
         bool active = false;
 
         if (draw) {
-            renderer->camera.viewport = Rectangle2<i32>(0, 0, window.width(), window.height());
-            renderer->camera.projectionMatrix = PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0);
+            renderer->camera = renderer->camera.withViewportAndProjection(
+                Rectangle2<i32>(0, 0, window.width(), window.height()),
+                PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0)
+            );
             // renderer->camera.viewMatrix = LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 10.0, Clock::elapsed(firstDraw) * M_PI * 2, 0);
             // renderer.animate();
 

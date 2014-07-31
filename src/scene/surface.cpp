@@ -41,17 +41,12 @@ void Surface::animate(f64 t, f64 dt) {
 }
 
 void Surface::render(const shared_ptr<Renderer> &renderer) {
-    const Matrix<f32, 4, 4> & pMatrix = renderer->camera.projectionMatrix;
-    const Matrix<f32, 4, 4> & vMatrix = renderer->camera.viewMatrix;
-    const Matrix<f32, 4, 4> pvMatrix(pMatrix * vMatrix);
-    const Matrix<f32, 4, 4> pvmMatrix(pvMatrix * this->modelMatrix);
-
     this->program->enable();
 
-    this->program->uniform("pMatrix", pMatrix);
-    this->program->uniform("vMatrix", vMatrix);
-    this->program->uniform("pvMatrix", pvMatrix);
-    this->program->uniform("pvmMatrix", pvmMatrix);
+    this->program->uniform("pMatrix", renderer->camera.projectionMatrix());
+    this->program->uniform("vMatrix", renderer->camera.viewMatrix());
+    this->program->uniform("pvMatrix", renderer->camera.projectionViewMatrix());
+    this->program->uniform("pvmMatrix", renderer->camera.projectionViewMatrix() * this->modelMatrix);
 
     this->renderImpl(renderer);
 

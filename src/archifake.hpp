@@ -84,10 +84,12 @@ typedef double                  f64;
 
 
 // program headers
+#include "math/utils.hpp"
+#include "math/algebra.hpp"
+#include "math/transforms.hpp"
+#include "math/geometry.hpp"
 #include "utils/stl.hpp"
 #include "utils/clock.hpp"
-#include "utils/math.hpp"
-#include "utils/math_transforms.hpp"
 #include "utils/buffer.hpp"
 #include "utils/shader.hpp"
 #include "scene/camera.hpp"

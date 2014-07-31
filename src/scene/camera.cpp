@@ -23,11 +23,10 @@
 #include "archifake.hpp"
 
 
-Vector<f32, 3> Camera::unprojectPoint(const Vector<i32, 3> &window) const {
-    const Matrix<f32, 4, 4> transform(inverse(this->projectionMatrix * this->viewMatrix));
-    const Vector<f32, 4> vec = transform * Vector4<f32>(
-        (f32)(2 * (window[0] - this->viewport.tl[0])) / (f32)this->viewport.width() - 1,
-        (f32)(2 * (window[1] - this->viewport.tl[1])) / (f32)this->viewport.height() - 1,
+Vector<f32, 3> Camera::unprojectPoint(const Vector<i32, 3> &window) {
+    auto vec = *this->_projectionViewMatrixInverse * Vector4<f32>(
+        (f32)(2 * (window[0] - this->_viewport.x())) / (f32)this->_viewport.width() - 1,
+        (f32)(2 * (window[1] - this->_viewport.y())) / (f32)this->_viewport.height() - 1,
         (f32)(2 * window[3]) - 1,
         1
     );
@@ -35,17 +34,16 @@ Vector<f32, 3> Camera::unprojectPoint(const Vector<i32, 3> &window) const {
     return Vector3<f32>(vec[0], vec[1], vec[2]);
 }
 
-Line<f32, 3> Camera::unprojectLine(const Vector<i32, 2> &window) const {
-    const Matrix<f32, 4, 4> transform(inverse(this->projectionMatrix * this->viewMatrix));
-    const Vector<f32, 4> vec1 = transform * Vector4<f32>(
-        (f32)(2 * (window[0] - this->viewport.tl[0])) / (f32)this->viewport.width() - 1,
-        (f32)(2 * (window[1] - this->viewport.tl[1])) / (f32)this->viewport.height() - 1,
+Line<f32, 3> Camera::unprojectLine(const Vector<i32, 2> &window) {
+    auto vec1 = *this->_projectionViewMatrixInverse * Vector4<f32>(
+        (f32)(2 * (window[0] - this->_viewport.x())) / (f32)this->_viewport.width() - 1,
+        (f32)(2 * (window[1] - this->_viewport.y())) / (f32)this->_viewport.height() - 1,
         -1,
         1
     );
-    const Vector<f32, 4> vec2 = transform * Vector4<f32>(
-        (f32)(2 * (window[0] - this->viewport.tl[0])) / (f32)this->viewport.width() - 1,
-        (f32)(2 * (window[1] - this->viewport.tl[1])) / (f32)this->viewport.height() - 1,
+    auto vec2 = *this->_projectionViewMatrixInverse * Vector4<f32>(
+        (f32)(2 * (window[0] - this->_viewport.x())) / (f32)this->_viewport.width() - 1,
+        (f32)(2 * (window[1] - this->_viewport.y())) / (f32)this->_viewport.height() - 1,
         1,
         1
     );
