@@ -24,9 +24,9 @@
 
 
 Vector<f32, 3> Camera::unprojectPoint(const Vector<i32, 3> &window) {
-    auto vec = *this->_projectionViewMatrixInverse * Vector4<f32>(
-        (f32)(2 * (window[0] - this->_viewport.x())) / (f32)this->_viewport.width() - 1,
-        (f32)(2 * (window[1] - this->_viewport.y())) / (f32)this->_viewport.height() - 1,
+    auto vec = this->projectionViewMatrixInverse() * Vector4<f32>(
+        (f32)(2 * (window[0] - this->viewport.x())) / (f32)this->viewport.width() - 1,
+        (f32)(2 * (window[1] - this->viewport.y())) / (f32)this->viewport.height() - 1,
         (f32)(2 * window[3]) - 1,
         1
     );
@@ -35,15 +35,15 @@ Vector<f32, 3> Camera::unprojectPoint(const Vector<i32, 3> &window) {
 }
 
 Line<f32, 3> Camera::unprojectLine(const Vector<i32, 2> &window) {
-    auto vec1 = *this->_projectionViewMatrixInverse * Vector4<f32>(
-        (f32)(2 * (window[0] - this->_viewport.x())) / (f32)this->_viewport.width() - 1,
-        (f32)(2 * (window[1] - this->_viewport.y())) / (f32)this->_viewport.height() - 1,
+    auto vec1 = this->projectionViewMatrixInverse() * Vector4<f32>(
+        (f32)(2 * (window[0] - this->viewport.x())) / (f32)this->viewport.width() - 1,
+        (f32)(2 * (window[1] - this->viewport.y())) / (f32)this->viewport.height() - 1,
         -1,
         1
     );
-    auto vec2 = *this->_projectionViewMatrixInverse * Vector4<f32>(
-        (f32)(2 * (window[0] - this->_viewport.x())) / (f32)this->_viewport.width() - 1,
-        (f32)(2 * (window[1] - this->_viewport.y())) / (f32)this->_viewport.height() - 1,
+    auto vec2 = this->projectionViewMatrixInverse() * Vector4<f32>(
+        (f32)(2 * (window[0] - this->viewport.x())) / (f32)this->viewport.width() - 1,
+        (f32)(2 * (window[1] - this->viewport.y())) / (f32)this->viewport.height() - 1,
         1,
         1
     );

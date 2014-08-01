@@ -66,26 +66,23 @@ FlatSurface::~FlatSurface() {
 }
 
 void FlatSurface::setup() {
-    this->vertices.setVertex(0, Vector2<f32>( 0.5,  0.5));
-    this->vertices.setVertex(1, Vector2<f32>(-0.5,  0.5));
-    this->vertices.setVertex(2, Vector2<f32>(-0.5, -0.5));
-    this->vertices.setVertex(3, Vector2<f32>( 0.5, -0.5));
-
-    this->triangles.setFace(0, {0, 1, 2});
-    this->triangles.setFace(1, {2, 3, 0});
-
     if (this->id == GL_ZERO) {
         return;
     }
-    glBindVertexArray(this->id);
-
 
     GLint inPosition = this->program->attributeLocation("inPosition");
 
+    glBindVertexArray(this->id);
+
     if (inPosition >= 0) {
+        this->vertices.setVertex(0, Vector2<f32>( 0.5,  0.5));
+        this->vertices.setVertex(1, Vector2<f32>(-0.5,  0.5));
+        this->vertices.setVertex(2, Vector2<f32>(-0.5, -0.5));
+        this->vertices.setVertex(3, Vector2<f32>( 0.5, -0.5));
         this->vertices.enable();
+
         glEnableVertexAttribArray(inPosition);
-        // glVertexAttribDivisor(inPosition, 0);
+        glVertexAttribDivisor(inPosition, 0);
         glVertexAttribPointer(
             inPosition,
             2,
@@ -94,16 +91,21 @@ void FlatSurface::setup() {
             0,
             reinterpret_cast<GLvoid*>(0)
         );
+
         this->vertices.disable();
     }
 
+    this->triangles.setFace(0, {0, 1, 2});
+    this->triangles.setFace(1, {2, 3, 0});
     this->triangles.enable();
 
     glBindVertexArray(GL_ZERO);
 
     this->triangles.disable();
 
-    glDisableVertexAttribArray(inPosition);
+    if (inPosition >= 0) {
+        glDisableVertexAttribArray(inPosition);
+    }
 }
 
 void FlatSurface::renderImpl(const shared_ptr<Renderer> &renderer) {
@@ -111,11 +113,10 @@ void FlatSurface::renderImpl(const shared_ptr<Renderer> &renderer) {
         return;
     }
 
-    // glDisable(GL_SCISSOR_TEST);
-    // glDisable(GL_STENCIL_TEST);
-    // glDisable(GL_DEPTH_TEST);
-    // glDisable(GL_CULL_FACE);
-    // glCullFace(GL_FRONT_AND_BACK);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     glBindVertexArray(this->id);
 
@@ -127,6 +128,9 @@ void FlatSurface::renderImpl(const shared_ptr<Renderer> &renderer) {
     );
 
     glBindVertexArray(GL_ZERO);
+
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
 }
 
 void FlatSurface::animate(f64 t, f64 dt) {

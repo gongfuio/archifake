@@ -27,7 +27,7 @@
 class Buffer {
 private:
     GLuint id;
-    i32u enabled;
+    i32 enabled;
 
 
 protected:

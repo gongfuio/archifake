@@ -30,74 +30,94 @@ public:
 
 
 protected:
-    Rectangle2<i32> _viewport;
-    Range<f64> _depthRange;
     M _projectionMatrix;
     M _viewMatrix;
 
-    LazyInitialized<M> _projectionViewMatrix;
-    LazyInitialized<M> _projectionMatrixInverse;
-    LazyInitialized<M> _viewMatrixInverse;
-    LazyInitialized<M> _projectionViewMatrixInverse;
-
 
 public:
-    inline Camera() : _depthRange(0.0, 1.0), _projectionMatrix(IdentityTransform<f32>()), _viewMatrix(IdentityTransform<f32>()),
-        _projectionViewMatrix(
+    LazyInitialized<M> projectionViewMatrix;
+    LazyInitialized<M> projectionMatrixInverse;
+    LazyInitialized<M> viewMatrixInverse;
+    LazyInitialized<M> projectionViewMatrixInverse;
+    Rectangle2<i32> viewport;
+    Range<f64> depthRange;
+    RGBA<f32> clearColor;
+    f64 clearDepth;
+    i32 clearStencil;
+
+
+    Camera() : _projectionMatrix(IdentityTransform<f32>()), _viewMatrix(IdentityTransform<f32>()),
+        projectionViewMatrix(
             [] (M &mat) { mat = IdentityTransform<f32>(); }
         ),
-        _projectionMatrixInverse(
+        projectionMatrixInverse(
             [] (M &mat) { mat = IdentityTransform<f32>(); }
         ),
-        _viewMatrixInverse(
+        viewMatrixInverse(
             [] (M &mat) { mat = IdentityTransform<f32>(); }
         ),
-        _projectionViewMatrixInverse(
+        projectionViewMatrixInverse(
             [] (M &mat) { mat = IdentityTransform<f32>(); }
-        )
-    {
+        ),
+        depthRange(0.0, 1.0),
+        clearDepth(1.0),
+        clearStencil(0) {
     }
 
-    inline Camera(const Rectangle2<i32> &viewport, const Range<f64> &depthRange, const M &projectionMatrix, const M &viewMatrix) : _viewport(viewport), _depthRange(depthRange), _projectionMatrix(projectionMatrix), _viewMatrix(viewMatrix),
-        _projectionViewMatrix(
+    Camera(const M &projectionMatrix, const M &viewMatrix) : _projectionMatrix(projectionMatrix), _viewMatrix(viewMatrix),
+        projectionViewMatrix(
             [this] (M &mat) { mat = this->_projectionMatrix * this->_viewMatrix; }
         ),
-        _projectionMatrixInverse(
+        projectionMatrixInverse(
             [this] (M &mat) { mat = inverse(this->_projectionMatrix); }
         ),
-        _viewMatrixInverse(
+        viewMatrixInverse(
             [this] (M &mat) { mat = inverse(this->_viewMatrix); }
         ),
-        _projectionViewMatrixInverse(
-            [this] (M &mat) { mat = inverse(*this->_projectionViewMatrix); }
-        )
-    {
+        projectionViewMatrixInverse(
+            [this] (M &mat) { mat = inverse(this->projectionViewMatrix()); }
+        ),
+        depthRange(0.0, 1.0),
+        clearDepth(1.0),
+        clearStencil(0) {
     }
 
-    inline Camera(const Camera &camera) : _viewport(camera._viewport), _depthRange(camera._depthRange), _projectionMatrix(camera._projectionMatrix), _viewMatrix(camera._viewMatrix), _projectionViewMatrix(camera._projectionViewMatrix), _projectionMatrixInverse(camera._projectionViewMatrixInverse), _viewMatrixInverse(camera._viewMatrixInverse), _projectionViewMatrixInverse(camera._projectionViewMatrixInverse) {
+    Camera(const Camera &camera) : _projectionMatrix(camera._projectionMatrix), _viewMatrix(camera._viewMatrix),
+        projectionViewMatrix(
+            [this] (M &mat) { mat = this->_projectionMatrix * this->_viewMatrix; }
+        ),
+        projectionMatrixInverse(
+            [this] (M &mat) { mat = inverse(this->_projectionMatrix); }
+        ),
+        viewMatrixInverse(
+            [this] (M &mat) { mat = inverse(this->_viewMatrix); }
+        ),
+        projectionViewMatrixInverse(
+            [this] (M &mat) { mat = inverse(this->projectionViewMatrix()); }
+        ),
+        viewport(camera.viewport),
+        depthRange(camera.depthRange),
+        clearColor(camera.clearColor),
+        clearDepth(camera.clearDepth),
+        clearStencil(camera.clearStencil) {
     }
 
 
     Camera & operator =(const Camera &camera) {
-        this->_viewport = camera._viewport;
-        this->_depthRange = camera._depthRange;
         this->_projectionMatrix = camera._projectionMatrix;
         this->_viewMatrix = camera._viewMatrix;
-        this->_projectionViewMatrix = camera._projectionViewMatrix;
-        this->_projectionMatrixInverse = camera._projectionMatrixInverse;
-        this->_viewMatrixInverse = camera._viewMatrixInverse;
-        this->_projectionViewMatrixInverse = camera._projectionViewMatrixInverse;
+        this->projectionViewMatrix = camera.projectionViewMatrix;
+        this->projectionMatrixInverse = camera.projectionMatrixInverse;
+        this->viewMatrixInverse = camera.viewMatrixInverse;
+        this->projectionViewMatrixInverse = camera.projectionViewMatrixInverse;
+        this->viewport = camera.viewport;
+        this->depthRange = camera.depthRange;
+        this->clearColor = camera.clearColor;
+        this->clearDepth = camera.clearDepth;
+        this->clearStencil = camera.clearStencil;
         return *this;
     }
 
-
-    inline const Rectangle2<i32> &viewport() const {
-        return this->_viewport;
-    }
-
-    inline const Range<f64> &depthRange() const {
-        return this->_depthRange;
-    }
 
     inline const M &projectionMatrix() const {
         return this->_projectionMatrix;
@@ -108,41 +128,18 @@ public:
     }
 
 
-    inline const M & projectionViewMatrix() {
-        return *this->_projectionViewMatrix;
-    }
-
-    inline const M & projectionMatrixInverse() {
-        return *this->_projectionMatrixInverse;
-    }
-
-    inline const M & viewMatrixInverse() {
-        return *this->_viewMatrixInverse;
-    }
-
-    inline const M & projectionViewMatrixInverse() {
-        return *this->_projectionViewMatrixInverse;
-    }
-
-
-    inline Camera withViewport(const Rectangle2<i32> &viewport) const {
-        return Camera(viewport, this->_depthRange, this->_projectionMatrix, this->_viewMatrix);
-    }
-
-    inline Camera withViewportAndProjection(const Rectangle2<i32> &viewport, const M &projectionMatrix) const {
-        return Camera(viewport, this->_depthRange, projectionMatrix, this->_viewMatrix);
-    }
-
-    inline Camera withDepthRange(const Range<f64> &depthRange) const {
-        return Camera(this->_viewport, depthRange, this->_projectionMatrix, this->_viewMatrix);
-    }
-
     inline Camera withProjectionMatrix(const M &projectionMatrix) const {
-        return Camera(this->_viewport, this->_depthRange, projectionMatrix, this->_viewMatrix);
+        Camera copy(*this);
+
+        copy._projectionMatrix = projectionMatrix;
+        return copy;
     }
 
     inline Camera withViewMatrix(const M &viewMatrix) const {
-        return Camera(this->_viewport, this->_depthRange, this->_projectionMatrix, viewMatrix);
+        Camera copy(*this);
+
+        copy._viewMatrix = viewMatrix;
+        return copy;
     }
 
 

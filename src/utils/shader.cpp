@@ -275,9 +275,10 @@ const string & Shader::getLogs() const {
 shared_ptr<Shader> Shader::fromFile(GLenum type, const string &path) {
     stringstream source;
     ifstream file(path);
+    int c;
 
-    while (!file.eof()) {
-        source.put(file.get());
+    while ((c = file.get()) != EOF) {
+        source.put((char)c);
     }
     return shared_ptr<Shader>(new Shader(type, source.str()));
 }

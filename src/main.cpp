@@ -27,18 +27,24 @@ static const f64 frameTime = 1.0 / 60.0;
 
 
 void run(Display *display, Screen *screen) {
-    GLWindow window(display, screen);
+    shared_ptr<GLWindow> window(new GLWindow(display, screen));
 
     // create window
-    if (!window.create()) {
+    if (!window->create()) {
         fprintf(stderr, "ERROR: Cannot create window!\n");
     }
-    if (!window.activate()) {
+    if (!window->activate()) {
         fprintf(stderr, "ERROR: Cannot activate window!\n");
     }
 
     // setup glew
     glewInit();
+
+    // setup renderer
+    window->camera = Camera(
+        PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window->ratio(), 0.01, 100.0),
+        LookAtTransform<f32>(Vector3<f32>(0, 0.25, 1), Vector3<f32>(0, 0, 0), Vector3<f32>(0, 1, 0))
+    );
 
     // setup demo scene
     shared_ptr<ShaderProgram> program(
@@ -56,48 +62,40 @@ void run(Display *display, Screen *screen) {
     scene.startAll();
     scene.showAll();
 
-    // setup demo renderer
-    shared_ptr<Renderer> renderer(new Renderer());
-
-    renderer->camera = Camera(
-        Rectangle2<i32>(0, 0, window.width(), window.height()),
-        Range<f64>(0.0, 1.0),
-        PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0),
-        LookAtTransform<f32>(Vector3<f32>(0, 0.25, 1), Vector3<f32>(0, 0, 0), Vector3<f32>(0, 1, 0))
-    );
-
     // event loop
     i64u firstDraw, lastDraw;
 
     firstDraw = Clock::tick();
     lastDraw = Clock::tick();
-    while (window.exists()) {
+    while (window->exists()) {
         bool draw = Clock::elapsed(lastDraw) >= frameTime;
         bool active = false;
 
         if (draw) {
-            renderer->camera = renderer->camera.withViewportAndProjection(
-                Rectangle2<i32>(0, 0, window.width(), window.height()),
-                PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window.ratio(), 0.01, 100.0)
+            window->camera.viewport = Rectangle2<i32>(0, 0, window->width(), window->height());
+            window->camera = window->camera.withProjectionMatrix(
+                PerspectiveProjection<f32>(60.0 / 180.0 * M_PI, window->ratio(), 0.01, 100.0)
             );
-            // renderer->camera.viewMatrix = LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 10.0, Clock::elapsed(firstDraw) * M_PI * 2, 0);
+            // .withViewMatrix(
+            //  LookAroundYTransform<f32>(Vector3<f32>(0, 0, 0), 10.0, Clock::elapsed(firstDraw) * M_PI * 2, 0)
+            // );
             // renderer.animate();
 
             lastDraw = Clock::tick();
-            window.beginFrame(renderer->camera);
-            scene.animate();
+            window->beginFrame();
 
-            scene.render(renderer);
+            scene.animate();
+            scene.render(window);
         }
         while (XPending(display)) {
             XEvent xev;
 
             XNextEvent(display, &xev);
-            window.processEvent(xev);
+            window->processEvent(xev);
             active = true;
         }
         if (draw) {
-            window.endFrame();
+            window->endFrame();
         } else if (!active) {
             f64 wait = frameTime - Clock::elapsed(lastDraw);
 
@@ -108,8 +106,8 @@ void run(Display *display, Screen *screen) {
     }
 
     // destroy window
-    window.deactivate();
-    window.destroy();
+    window->deactivate();
+    window->destroy();
 }
 
 

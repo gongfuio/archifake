@@ -88,15 +88,17 @@ typedef double                  f64;
 #include "math/algebra.hpp"
 #include "math/transforms.hpp"
 #include "math/geometry.hpp"
+#include "math/misc.hpp"
 #include "utils/stl.hpp"
 #include "utils/clock.hpp"
 #include "utils/buffer.hpp"
+#include "utils/texture.hpp"
 #include "utils/shader.hpp"
 #include "scene/camera.hpp"
 #include "scene/renderer.hpp"
+#include "scene/window.hpp"
 #include "scene/surface.hpp"
 #include "scene/scene.hpp"
-#include "window.hpp"
 
 
 #endif //__ARCHIFAKE_H_INCLUDE__

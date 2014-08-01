@@ -31,6 +31,25 @@ public:
 
     Renderer() {
     }
+
+    virtual ~Renderer() {
+    }
+
+
+    virtual i32 width() const = 0;
+
+    virtual i32 height() const = 0;
+
+    f32 ratio() const {
+        if (this->height() > 0) {
+            return (f32)this->width() / (f32)this->height();
+        }
+        return 1.0f;
+    }
+
+
+    virtual void beginFrame() = 0;
+    virtual void endFrame() = 0;
 };
 
 

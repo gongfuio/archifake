@@ -334,18 +334,31 @@ bool GLWindow::activate() {
     return true;
 }
 
-void GLWindow::beginFrame(const Camera &camera) {
+void GLWindow::deactivate() {
     if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
-        auto &viewport = camera.viewport();
+        glXMakeContextCurrent(this->display, None, None, NULL);
+    }
+}
 
+void GLWindow::beginFrame() {
+    if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
         glViewport(
-            viewport.x(),
-            viewport.y(),
-            viewport.width(),
-            viewport.height()
+            this->camera.viewport.x(),
+            this->camera.viewport.y(),
+            this->camera.viewport.width(),
+            this->camera.viewport.height()
         );
-        glClearColor(0.0, 0.0, 0.0, 1.0);
-        glClearDepth(0.0);
+        glDepthRange(
+            this->camera.depthRange.minimum(),
+            this->camera.depthRange.maximum()
+        );
+        glClearColor(
+            this->camera.clearColor.r(),
+            this->camera.clearColor.g(),
+            this->camera.clearColor.b(),
+            this->camera.clearColor.a()
+        );
+        glClearDepth(this->camera.clearDepth);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 }
@@ -354,11 +367,5 @@ void GLWindow::endFrame() {
     if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
         glFlush();
         glXSwapBuffers(this->display, this->glxWindow);
-    }
-}
-
-void GLWindow::deactivate() {
-    if (this->glxContext != NULL && glXGetCurrentContext() == this->glxContext) {
-        glXMakeContextCurrent(this->display, None, None, NULL);
     }
 }

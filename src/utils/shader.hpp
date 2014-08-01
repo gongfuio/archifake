@@ -92,7 +92,7 @@ protected:
     GLuint id;
     bool linked;
     bool validated;
-    i32u enabled;
+    i32 enabled;
     list<shared_ptr<Shader> > shaders;
     string linkerLogs;
     string validatorLogs;
